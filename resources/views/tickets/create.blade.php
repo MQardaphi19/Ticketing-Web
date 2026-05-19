@@ -11,7 +11,7 @@
                 <div class="card-body p-4">
                     <h5 class="mb-4 fw-semibold">Formulir Permohonan</h5>
 
-                    <form method="POST" action="{{ route('tickets.store') }}" id="ticketForm">
+                    <form method="POST" action="{{ route('admin.tickets.store') }}" id="ticketForm">
                         @csrf
 
                         <div class="mb-3">
@@ -84,7 +84,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <iconify-icon icon="solar:send-linear" class="me-2"></iconify-icon>Kirim Permohonan
                             </button>
-                            <a href="{{ route('tickets.my') }}" class="btn btn-light">
+                            <a href="{{ route('admin.tickets.my') }}" class="btn btn-light">
                                 <iconify-icon icon="solar:close-circle-linear" class="me-2"></iconify-icon>Batal
                             </a>
                         </div>
@@ -251,7 +251,7 @@
         }
 
         function processChatbotPrediction(message) {
-            fetch('/chatbot/predict', {
+            fetch('/admin/chatbot/predict', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

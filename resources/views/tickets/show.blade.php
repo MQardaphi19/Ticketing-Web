@@ -115,7 +115,7 @@
             @endforeach
           </div>
 
-          <form method="POST" action="{{ route('tickets.messages.store', $ticket->id) }}" id="messageForm">
+          <form method="POST" action="{{ route('admin.tickets.messages.store', $ticket->id) }}" id="messageForm">
             @csrf
             <div class="input-group">
               <input type="text" class="form-control" name="message" id="messageInput" placeholder="Ketik pesan Anda..." required>
@@ -245,7 +245,7 @@
         <h5 class="modal-title">Ubah Status Tiket</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="{{ route('tickets.update', $ticket->id) }}">
+      <form method="POST" action="{{ route('admin.tickets.update', $ticket->id) }}">
         @csrf
         @method('PUT')
         <div class="modal-body">
@@ -276,7 +276,7 @@
         <h5 class="modal-title">Tugaskan Teknisi</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="{{ route('tickets.update', $ticket->id) }}">
+      <form method="POST" action="{{ route('admin.tickets.update', $ticket->id) }}">
         @csrf
         @method('PUT')
         <div class="modal-body">

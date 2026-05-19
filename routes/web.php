@@ -15,84 +15,93 @@ Route::get('/', function () {
 });
 
 // Require auth untuk semua route ticket
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->prefix("admin")->name("admin.")->group(function () {
 
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-Route::prefix('tickets')->name('tickets.')->group(function () {
-    Route::get('/my', [TicketController::class, 'my'])->name('my');
-    Route::get('/create', [TicketController::class, 'create'])->name('create');
-    Route::post('/', [TicketController::class, 'store'])->name('store');
-    Route::get('/', [TicketController::class, 'index'])->name('index');
-    Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
-    Route::put('/{ticket}', [TicketController::class, 'update'])->name('update');
-    Route::delete('/{ticket}', [TicketController::class, 'destroy'])->name('destroy');
-    Route::post('/{ticket}/messages', [TicketController::class, 'storeMessage']);
-    Route::post('/bulk/assign', [TicketController::class, 'bulkAssign'])->name('bulk.assign');
-    Route::post('/bulk/status', [TicketController::class, 'bulkStatus'])->name('bulk.status');
-});
+    Route::prefix('tickets')->name('tickets.')->group(function () {
+        Route::get('/my', [TicketController::class, 'my'])->name('my');
+        Route::get('/create', [TicketController::class, 'create'])->name('create');
+        Route::post('/', [TicketController::class, 'store'])->name('store');
+        Route::get('/', [TicketController::class, 'index'])->name('index');
+        Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
+        Route::put('/{ticket}', [TicketController::class, 'update'])->name('update');
+        Route::delete('/{ticket}', [TicketController::class, 'destroy'])->name('destroy');
+        Route::post('/{ticket}/messages', [TicketController::class, 'storeMessage']);
+        Route::post('/bulk/assign', [TicketController::class, 'bulkAssign'])->name('bulk.assign');
+        Route::post('/bulk/status', [TicketController::class, 'bulkStatus'])->name('bulk.status');
+    });
 
-Route::prefix('categories')->name('categories.')->group(function () {
-    Route::get('/', [CategoryController::class, 'index'])->name('index');
-    Route::post('/', [CategoryController::class, 'store'])->name('store');
-    Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
-    Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
-});
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [CategoryController::class, 'index'])->name('index');
+        Route::post('/', [CategoryController::class, 'store'])->name('store');
+        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+    });
 
-// Knowledge Base Controller
-Route::prefix('knowledge')->name('knowledge.')->group(function () {
-    Route::get('/', [KnowledgeBaseController::class, 'index'])->name('index');
-    Route::post('/', [KnowledgeBaseController::class, 'store'])->name('store');
-    Route::put('/{knowledge}', [KnowledgeBaseController::class, 'update'])->name('update');
-    Route::delete('/{knowledge}', [KnowledgeBaseController::class, 'destroy'])->name('destroy');
-});
+    // Knowledge Base Controller
+    Route::prefix('knowledge')->name('knowledge.')->group(function () {
+        Route::get('/', [KnowledgeBaseController::class, 'index'])->name('index');
+        Route::post('/', [KnowledgeBaseController::class, 'store'])->name('store');
+        Route::put('/{knowledge}', [KnowledgeBaseController::class, 'update'])->name('update');
+        Route::delete('/{knowledge}', [KnowledgeBaseController::class, 'destroy'])->name('destroy');
+    });
 
-// Chatbot AI Routes
-Route::prefix('chatbot')->name('chatbot.')->group(function () {
-    Route::get('/logs', [ChatbotController::class, 'logs'])->name('logs');
-    Route::post('/predict', [ChatbotController::class, 'predict'])->name('predict');
-});
+    // Chatbot AI Routes
+    Route::prefix('chatbot')->name('chatbot.')->group(function () {
+        Route::get('/logs', [ChatbotController::class, 'logs'])->name('logs');
+        Route::post('/predict', [ChatbotController::class, 'predict'])->name('predict');
+    });
 
-// Admin AI Training Routes
-Route::prefix('admin')->group(function () {
+    // Admin AI Training Routes
     Route::post('/export-dataset', [KnowledgeBaseController::class, 'exportDataset']);
     Route::post('/train-model', [KnowledgeBaseController::class, 'trainModel']);
     Route::post('/chatbot/validate', [ChatbotController::class, 'validatePrediction']);
-});
 
-Route::prefix('users')->name('users.')->group(function () {
-    Route::get('/', [UserController::class, 'index'])->name('index');
-    Route::post('/', [UserController::class, 'store'])->name('store');
-    Route::put('/{user}', [UserController::class, 'update'])->name('update');
-    Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
-});
-
-// Custom routes
-        Route::post('/{ticket}/assign', [TicketController::class, 'assign'])
-            ->name('assign')
-            ->middleware('can:assign,ticket');
-
-        Route::post('/{ticket}/status', [TicketController::class, 'updateStatus'])
-            ->name('status.update')
-            ->middleware('can:updateStatus,ticket');
-
-        Route::get('/datatable', [TicketController::class, 'datatable'])
-            ->name('datatable');
-
-        // Comments
-        Route::post('/{ticket}/comments', [TicketCommentController::class, 'store'])
-            ->name('comments.store');
-
-        Route::put('/comments/{comment}', [TicketCommentController::class, 'update'])
-            ->name('comments.update');
-
-        Route::delete('/comments/{comment}', [TicketCommentController::class, 'destroy'])
-            ->name('comments.destroy');
+    Route::prefix('users')->name('users.')->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('index');
+        Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::put('/{user}', [UserController::class, 'update'])->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
     });
-  
-    
+
+    // Custom routes
+    Route::post('/{ticket}/assign', [TicketController::class, 'assign'])
+        ->name('assign')
+        ->middleware('can:assign,ticket');
+
+    Route::post('/{ticket}/status', [TicketController::class, 'updateStatus'])
+        ->name('status.update')
+        ->middleware('can:updateStatus,ticket');
+
+    Route::get('/datatable', [TicketController::class, 'datatable'])
+        ->name('datatable');
+
+    // Comments
+    Route::post('/{ticket}/comments', [TicketCommentController::class, 'store'])
+        ->name('comments.store');
+
+    Route::put('/comments/{comment}', [TicketCommentController::class, 'update'])
+        ->name('comments.update');
+
+    Route::delete('/comments/{comment}', [TicketCommentController::class, 'destroy'])
+        ->name('comments.destroy');
+});
+
+Route::middleware(['auth', 'role:kepala-diskominfo'])->prefix("kepala")->name("kepala.")->group(function () {
+    Route::get('/dashboard', function () {
+        return "Ini adalah dashboard untuk Kepala Dinas Kominfo";
+    })->name('dashboard');
+});
+
+Route::middleware(['auth', 'role:pegawai-dinas'])->prefix("pegawai")->name("pegawai.")->group(function () {
+    Route::get('/dashboard', function () {
+        return "Ini adalah dashboard untuk Pegawai Dinas";
+    })->name('dashboard');
+});
+
+
 
 
 // API Routes (untuk SPA/Mobile App)
@@ -110,4 +119,4 @@ Route::post('/logout', function () {
 })->name('logout');
 
 // Authentication Routes
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

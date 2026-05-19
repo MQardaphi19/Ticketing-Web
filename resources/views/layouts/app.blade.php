@@ -32,7 +32,7 @@
     <aside class="left-sidebar" style="height: 100vh; overflow: hidden; position: fixed; top: 0; left: 0; z-index: 1000;">
       <div style="height: 100%; display: flex; flex-direction: column; background: #fff;">
         <div class="brand-logo d-flex align-items-center justify-content-between" style="padding: 15px 20px 15px 20px; margin-bottom: 0; border-bottom: 1px solid #dee2e6;">
-          <a href="{{ route('dashboard') }}" class="text-nowrap logo-img">
+          <a href="{{ route('admin.dashboard') }}" class="text-nowrap logo-img">
             <div class="d-flex align-items-center gap-2">
               <img src="{{ asset('assets/images/logos/logo-kominfoo.png') }}" alt="" style="height: 50px; width: auto;" />
               <h5>Sistem Ticketing <br>Diskominfo</h5>
@@ -88,26 +88,26 @@
               <iconify-icon icon="mdi:dots-horizontal" class="nav-small-cap-icon fs-4"></iconify-icon>
               <span class="hide-menu">Menu Utama</span>
             </li>
-            <li class="sidebar-item {{ request()->routeIs('dashboard') ? 'selected' : '' }}">
-              <a class="sidebar-link primary-hover-bg" href="{{ route('dashboard') }}" aria-expanded="false">
+            <li class="sidebar-item {{ request()->routeIs('admin.dashboard') ? 'selected' : '' }}">
+              <a class="sidebar-link primary-hover-bg" href="{{ route('admin.dashboard') }}" aria-expanded="false">
                 <iconify-icon icon="mdi:home"></iconify-icon>
                 <span class="hide-menu">Dashboard</span>
               </a>
             </li>
             <li class="sidebar-item {{ request()->routeIs('tickets.my') ? 'selected' : '' }}">
-              <a class="sidebar-link primary-hover-bg" href="{{ route('tickets.my') }}" aria-expanded="false">
+              <a class="sidebar-link primary-hover-bg" href="{{ route('admin.tickets.my') }}" aria-expanded="false">
                 <iconify-icon icon="mdi:ticket"></iconify-icon>
                 <span class="hide-menu">Tiket Saya</span>
               </a>
             </li>
             <li class="sidebar-item {{ request()->routeIs('tickets.create') ? 'selected' : '' }}">
-              <a class="sidebar-link primary-hover-bg" href="{{ route('tickets.create') }}" aria-expanded="false">
+              <a class="sidebar-link primary-hover-bg" href="{{ route('admin.tickets.create') }}" aria-expanded="false">
                 <iconify-icon icon="mdi:plus-circle"></iconify-icon>
                 <span class="hide-menu">Buat Tiket</span>
               </a>
             </li>
             <li class="sidebar-item {{ request()->routeIs('tickets.index') ? 'selected' : '' }}">
-              <a class="sidebar-link primary-hover-bg" href="{{ route('tickets.index') }}" aria-expanded="false">
+              <a class="sidebar-link primary-hover-bg" href="{{ route('admin.tickets.index') }}" aria-expanded="false">
                 <iconify-icon icon="mdi:ticket"></iconify-icon>
                 <span class="hide-menu">Semua Tiket</span>
               </a>
@@ -121,19 +121,19 @@
               <span class="hide-menu">Manajemen AI</span>
             </li>
             <li class="sidebar-item {{ request()->routeIs('categories.index') ? 'selected' : '' }}">
-              <a class="sidebar-link primary-hover-bg" href="{{ route('categories.index') }}" aria-expanded="false">
+              <a class="sidebar-link primary-hover-bg" href="{{ route('admin.categories.index') }}" aria-expanded="false">
                 <iconify-icon icon="mdi:folder"></iconify-icon>
                 <span class="hide-menu">Kategori</span>
               </a>
             </li>
             <li class="sidebar-item {{ request()->routeIs('knowledge.index') ? 'selected' : '' }}">
-              <a class="sidebar-link primary-hover-bg" href="{{ route('knowledge.index') }}" aria-expanded="false">
+              <a class="sidebar-link primary-hover-bg" href="{{ route('admin.knowledge.index') }}" aria-expanded="false">
                 <iconify-icon icon="mdi:book-open-variant"></iconify-icon>
                 <span class="hide-menu">Knowledge Base</span>
               </a>
             </li>
             <li class="sidebar-item {{ request()->routeIs('chatbot.logs') ? 'selected' : '' }}">
-              <a class="sidebar-link primary-hover-bg" href="{{ route('chatbot.logs') }}" aria-expanded="false">
+              <a class="sidebar-link primary-hover-bg" href="{{ route('admin.chatbot.logs') }}" aria-expanded="false">
                 <iconify-icon icon="mdi:chat"></iconify-icon>
                 <span class="hide-menu">Log Chatbot</span>
               </a>
@@ -145,8 +145,8 @@
               <iconify-icon icon="mdi:dots-horizontal" class="nav-small-cap-icon fs-4"></iconify-icon>
               <span class="hide-menu">Manajemen</span>
             </li>
-            <li class="sidebar-item {{ request()->routeIs('users.index') ? 'selected' : '' }}">
-              <a class="sidebar-link primary-hover-bg" href="{{ route('users.index') }}" aria-expanded="false">
+            <li class="sidebar-item {{ request()->routeIs('admin.users.index') ? 'selected' : '' }}">
+              <a class="sidebar-link primary-hover-bg" href="{{ route('admin.users.index') }}" aria-expanded="false">
                 <iconify-icon icon="mdi:account-group"></iconify-icon>
                 <span class="hide-menu">Pengguna</span>
               </a>

@@ -90,7 +90,7 @@ class TicketController extends Controller
 
         Ticket::create($validated);
 
-        return redirect()->route('tickets.my')->with('success', 'Tiket berhasil dibuat');
+        return redirect()->route('admin.tickets.my')->with('success', 'Tiket berhasil dibuat');
     }
 
     public function update(Request $request, int $id): \Illuminate\Http\RedirectResponse

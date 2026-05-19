@@ -30,7 +30,7 @@ class CategoryController extends Controller
             return response()->json(['message' => 'Kategori berhasil ditambahkan']);
         }
 
-        return redirect()->route('categories.index')->with('success', 'Kategori berhasil ditambahkan');
+        return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil ditambahkan');
     }
 
     public function update(Request $request, int $id)
@@ -50,7 +50,7 @@ class CategoryController extends Controller
             return response()->json(['message' => 'Kategori berhasil diperbarui']);
         }
 
-        return redirect()->route('categories.index')->with('success', 'Kategori berhasil diperbarui');
+        return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil diperbarui');
     }
 
     public function destroy(Request $request, int $id)
@@ -63,6 +63,6 @@ class CategoryController extends Controller
             return response()->json(['message' => 'Kategori berhasil dihapus']);
         }
 
-        return redirect()->route('categories.index')->with('success', 'Kategori berhasil dihapus');
+        return redirect()->route('admin.categories.index')->with('success', 'Kategori berhasil dihapus');
     }
 }

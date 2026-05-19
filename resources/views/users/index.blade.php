@@ -274,7 +274,7 @@
     if (confirm('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.')) {
       setLoading(true);
       
-      fetch('{{ route('users.destroy', ':id') }}'.replace(':id', id), {
+      fetch('{{ route('admin.users.destroy', ':id') }}'.replace(':id', id), {
         method: 'DELETE',
         headers: {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -311,8 +311,8 @@
     const userId = formData.get('user_id');
     const method = formData.get('_method');
     const url = method === 'PUT' 
-      ? '{{ route('users.update', ':id') }}'.replace(':id', userId)
-      : '{{ route('users.store') }}';
+      ? '{{ route('admin.users.update', ':id') }}'.replace(':id', userId)
+      : '{{ route('admin.users.store') }}';
     
     submitBtn.disabled = true;
     cancelBtn.disabled = true;

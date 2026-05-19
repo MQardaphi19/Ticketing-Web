@@ -113,7 +113,7 @@
       <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h5 class="mb-0 fw-semibold">Tiket Terbaru</h5>
-          <a href="{{ route('tickets.index') }}" class="btn btn-primary btn-sm">Lihat Semua</a>
+          <a href="{{ route('admin.tickets.index') }}" class="btn btn-primary btn-sm">Lihat Semua</a>
         </div>
         <div class="table-responsive">
           <table class="table table-hover align-middle">
