@@ -47,7 +47,12 @@ class Ticket extends Model
 
     public function messages(): HasMany
     {
-        return $this->hasMany(TicketMessage::class);
+        return $this->hasMany(TicketComment::class);
+    }
+
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(TicketAttachment::class);
     }
 
     public function getSlaStatusAttribute(): string

@@ -47,6 +47,16 @@ class User extends Authenticatable
         return $this->role === 'super-admin';
     }
 
+    public function isKepalaDiskominfo(): bool
+    {
+        return $this->role === 'kepala-diskominfo';
+    }
+
+    public function isPegawaiDinas(): bool
+    {
+        return $this->role === 'pegawai-dinas';
+    }
+
     public function isStaff(): bool
     {
         return $this->role === 'teknisi';
@@ -74,7 +84,7 @@ class User extends Authenticatable
 
     public function ticketMessages(): HasMany
     {
-        return $this->hasMany(TicketMessage::class);
+        return $this->hasMany(TicketComment::class);
     }
 
     public function chatbotLogs(): HasMany

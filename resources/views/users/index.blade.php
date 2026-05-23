@@ -38,7 +38,7 @@
                   </th>
                   <th>Nama</th>
                   <th>NIP</th>
-                  <th>Departemen</th>
+                  <th>Dinas</th>
                   <th>Role</th>
                   <th>Tiket</th>
                   <th>Status</th>
@@ -91,18 +91,13 @@
                       </button>
                       <ul class="dropdown-menu">
                         <li>
-                          <a class="dropdown-item" href="#" onclick="openEditModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->nip }}', '{{ $user->department }}', '{{ $user->phone }}')">
+                          <a class="dropdown-item" href="#" onclick="openEditModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->nip }}', '{{ $user->department }}', '{{ $user->phone }}', '{{ $user->role }}')">
                             <iconify-icon icon="solar:pen-linear" class="me-2"></iconify-icon>Edit
                           </a>
                         </li>
                         <li>
-                          <a class="dropdown-item" href="#" onclick="showToast('info', 'Fitur reset password akan segera tersedia.')">
+                          <a class="dropdown-item" href="#" onclick="openResetPasswordModal({{ $user->id }}, @js($user->name))">
                             <iconify-icon icon="solar:lock-password-linear" class="me-2"></iconify-icon>Reset Password
-                          </a>
-                        </li>
-                        <li>
-                          <a class="dropdown-item" href="#" onclick="showToast('info', 'Fitur kelola role akan segera tersedia.')">
-                            <iconify-icon icon="solar:shield-linear" class="me-2"></iconify-icon>Kelola Role
                           </a>
                         </li>
                         <li><hr class="dropdown-divider"></li>
@@ -172,24 +167,27 @@
               <input type="text" class="form-control" name="phone" id="userPhone" required>
             </div>
             <div class="col-md-6">
-              <label class="form-label">Departemen <span class="text-danger">*</span></label>
+              <label class="form-label">Dinas <span class="text-danger">*</span></label>
               <select class="form-select" name="department" id="userDepartment" required>
-                <option value="">Pilih Departemen</option>
-                <option value="TIK">TIK</option>
-                <option value="Pelayanan Publik">Pelayanan Publik</option>
-                <option value="Informasi dan Komunikasi">Informasi dan Komunikasi</option>
-                <option value="Administrasi">Administrasi</option>
-                <option value="Keuangan">Keuangan</option>
+                <option value="">Pilih Dinas</option>
+                <option value="Dinas Pendidikan">Dinas Pendidikan</option>
+                <option value="Dinas Kesehatan">Dinas Kesehatan</option>
+                <option value="Dinas BKPSDM">Dinas BKPSDM</option>
+                <option value="Dinas Sosial">Dinas Sosial</option>
+                <option value="Dinas Dukcapil">Dinas Dukcapil</option>
+                <option value="Inspektorat">Inspektorat</option>
+                <option value="Dinas Perizinan">Dinas Perizinan</option>
+                <option value="Dinas Kecamatan">Dinas Kecamatan</option>
+                <option value="Dinas Bappelitbangda">Dinas Bappelitbangda</option>
               </select>
             </div>
             <div class="col-md-6">
               <label class="form-label">Role <span class="text-danger">*</span></label>
               <select class="form-select" name="role" id="userRole" required>
                 <option value="">Pilih Role</option>
-                <option value="pemohon">Pemohon</option>
-                <option value="teknisi">Teknisi</option>
+                <option value="pegawai-dinas">Pegawai Dinas</option>
+                <option value="kepala-diskominfo">Kepala Dinas</option>
                 <option value="admin">Admin</option>
-                <option value="super-admin">Super Admin</option>
               </select>
             </div>
             <div class="col-md-6" id="passwordField">
@@ -207,6 +205,39 @@
           <button type="submit" class="btn btn-primary" id="submitBtn">
             <iconify-icon icon="solar:paper-plane-linear" class="me-2" id="submitIcon"></iconify-icon>
             <span id="submitText">Simpan</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="resetPasswordModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Reset Password</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form id="resetPasswordForm">
+        @csrf
+        <div class="modal-body">
+          <input type="hidden" name="user_id" id="resetUserId">
+          <p class="text-muted small mb-3">Reset password untuk <span class="fw-semibold" id="resetUserName"></span>.</p>
+          <div class="mb-3">
+            <label class="form-label">Password Baru <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" name="password" id="resetPassword" minlength="8" required>
+          </div>
+          <div class="mb-0">
+            <label class="form-label">Konfirmasi Password Baru <span class="text-danger">*</span></label>
+            <input type="password" class="form-control" name="password_confirmation" id="resetPasswordConfirmation" minlength="8" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="resetCancelBtn">Batal</button>
+          <button type="submit" class="btn btn-primary" id="resetSubmitBtn">
+            <iconify-icon icon="solar:lock-password-linear" class="me-2" id="resetSubmitIcon"></iconify-icon>
+            <span id="resetSubmitText">Reset Password</span>
           </button>
         </div>
       </form>
@@ -242,6 +273,8 @@
     document.getElementById('userPhone').value = '';
     document.getElementById('userDepartment').value = '';
     document.getElementById('userRole').value = '';
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userPasswordConfirmation').value = '';
     
     document.getElementById('passwordField').style.display = 'block';
     document.getElementById('passwordConfirmationField').style.display = 'block';
@@ -251,7 +284,7 @@
     new bootstrap.Modal(document.getElementById('userModal')).show();
   }
 
-  function openEditModal(id, name, email, nip, department, phone) {
+  function openEditModal(id, name, email, nip, department, phone, role) {
     document.getElementById('modalTitle').textContent = 'Edit Pengguna';
     document.getElementById('formMethod').value = 'PUT';
     document.getElementById('userId').value = id;
@@ -260,7 +293,9 @@
     document.getElementById('userNip').value = nip;
     document.getElementById('userPhone').value = phone;
     document.getElementById('userDepartment').value = department;
-    document.getElementById('userRole').value = '';
+    document.getElementById('userRole').value = role;
+    document.getElementById('userPassword').value = '';
+    document.getElementById('userPasswordConfirmation').value = '';
     
     document.getElementById('passwordField').style.display = 'none';
     document.getElementById('passwordConfirmationField').style.display = 'none';
@@ -274,29 +309,43 @@
     if (confirm('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.')) {
       setLoading(true);
       
-      fetch('{{ route('admin.users.destroy', ':id') }}'.replace(':id', id), {
+      fetch('{{ route('users.destroy', ':id') }}'.replace(':id', id), {
         method: 'DELETE',
         headers: {
           'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+          'Accept': 'application/json',
           'Content-Type': 'application/json'
         }
       })
-      .then(response => response.json())
+      .then(handleJsonResponse)
       .then(data => {
         showToast('success', data.message || 'Pengguna berhasil dihapus');
-        const item = document.querySelector(.user-item[data-id="${id}"]);
+        const item = document.querySelector(`.user-item[data-id="${id}"]`);
         if (item) {
           item.style.opacity = '0';
           setTimeout(() => item.remove(), 300);
         }
       })
       .catch(error => {
-        showToast('error', 'Gagal menghapus pengguna. Silakan coba lagi.');
+        showToast('error', error.message || 'Gagal menghapus pengguna. Silakan coba lagi.');
       })
       .finally(() => {
         setLoading(false);
       });
     }
+  }
+
+  function openResetPasswordModal(id, name) {
+    document.getElementById('resetUserId').value = id;
+    document.getElementById('resetUserName').textContent = name;
+    document.getElementById('resetPassword').value = '';
+    document.getElementById('resetPasswordConfirmation').value = '';
+    document.getElementById('resetSubmitBtn').disabled = false;
+    document.getElementById('resetCancelBtn').disabled = false;
+    document.getElementById('resetSubmitText').textContent = 'Reset Password';
+    document.getElementById('resetSubmitIcon').setAttribute('icon', 'solar:lock-password-linear');
+
+    new bootstrap.Modal(document.getElementById('resetPasswordModal')).show();
   }
 
   document.getElementById('userForm').addEventListener('submit', function(e) {
@@ -311,8 +360,8 @@
     const userId = formData.get('user_id');
     const method = formData.get('_method');
     const url = method === 'PUT' 
-      ? '{{ route('admin.users.update', ':id') }}'.replace(':id', userId)
-      : '{{ route('admin.users.store') }}';
+      ? '{{ route('users.update', ':id') }}'.replace(':id', userId)
+      : '{{ route('users.store') }}';
     
     submitBtn.disabled = true;
     cancelBtn.disabled = true;
@@ -323,18 +372,20 @@
       method: 'POST',
       headers: {
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json',
         'X-HTTP-Method-Override': method
       },
       body: formData
     })
-    .then(response => response.json())
+    .then(handleJsonResponse)
     .then(data => {
       bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
       showToast('success', data.message || (method === 'PUT' ? 'Pengguna berhasil diperbarui' : 'Pengguna berhasil ditambahkan'));
       setTimeout(() => location.reload(), 1000);
     })
     .catch(error => {
-      showToast('error', 'Gagal menyimpan pengguna. Silakan coba lagi.');
+      console.error('Error:', error);
+      showToast('error', error.message || 'Gagal menyimpan pengguna. Silakan coba lagi.');
       submitBtn.disabled = false;
       cancelBtn.disabled = false;
       submitText.textContent = method === 'PUT' ? 'Simpan Perubahan' : 'Simpan';
@@ -342,11 +393,61 @@
     });
   });
 
+  document.getElementById('resetPasswordForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const submitBtn = document.getElementById('resetSubmitBtn');
+    const submitText = document.getElementById('resetSubmitText');
+    const submitIcon = document.getElementById('resetSubmitIcon');
+    const cancelBtn = document.getElementById('resetCancelBtn');
+    const userId = document.getElementById('resetUserId').value;
+    const formData = new FormData(this);
+
+    submitBtn.disabled = true;
+    cancelBtn.disabled = true;
+    submitText.textContent = 'Mereset...';
+    submitIcon.setAttribute('icon', 'solar:refresh-linear');
+
+    fetch('{{ route('users.password.reset', ':id') }}'.replace(':id', userId), {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json',
+        'X-HTTP-Method-Override': 'PUT'
+      },
+      body: formData
+    })
+    .then(handleJsonResponse)
+    .then(data => {
+      bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
+      showToast('success', data.message || 'Password pengguna berhasil direset');
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      showToast('error', error.message || 'Gagal mereset password. Silakan coba lagi.');
+      submitBtn.disabled = false;
+      cancelBtn.disabled = false;
+      submitText.textContent = 'Reset Password';
+      submitIcon.setAttribute('icon', 'solar:lock-password-linear');
+    });
+  });
+
+  function handleJsonResponse(response) {
+    return response.json().then(data => {
+      if (!response.ok) {
+        const errors = data.errors ? Object.values(data.errors).flat().join(' ') : '';
+        throw new Error(errors || data.message || 'Request gagal diproses.');
+      }
+
+      return data;
+    });
+  }
+
   function showToast(type, message) {
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toastMessage');
     
-    toast.className = toast align-items-center text-white border-0 bg-${type === 'success' ? 'success' : type === 'info' ? 'info' : 'danger'};
+    toast.className = `toast align-items-center text-white border-0 bg-${type === 'success' ? 'success' : type === 'info' ? 'info' : 'danger'}`;
     toastMessage.textContent = message;
     
     const bsToast = new bootstrap.Toast(toast);

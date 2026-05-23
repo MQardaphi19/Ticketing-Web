@@ -92,7 +92,7 @@
               <tr class="ticket-row" data-status="{{ $ticket->status }}" data-priority="{{ $ticket->priority }}" data-category="{{ $ticket->category_id }}" data-assigned="{{ $ticket->assigned_to ?? 'unassigned' }}" data-subject="{{ $ticket->subject }}">
                 <td><input type="checkbox" class="form-check-input ticket-checkbox" value="{{ $ticket->id }}"></td>
                 <td>
-                  <a href="{{ route('admin.tickets.show', $ticket->id) }}" class="text-primary fw-semibold">{{ $ticket->ticket_number }}</a>
+                  <a href="{{ route('tickets.show', $ticket->id) }}" class="text-primary fw-semibold">{{ $ticket->ticket_number }}</a>
                 </td>
                 <td>
                   <div>
@@ -147,7 +147,7 @@
                     </button>
                     <ul class="dropdown-menu">
                       <li>
-                        <a class="dropdown-item" href="{{ route('admin.tickets.show', $ticket->id) }}">
+                        <a class="dropdown-item" href="{{ route('tickets.show', $ticket->id) }}">
                           <iconify-icon icon="solar:eye-linear" class="me-2"></iconify-icon>Lihat Detail
                         </a>
                       </li>
@@ -200,7 +200,7 @@
         <h5 class="modal-title">Tugaskan Teknisi</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="{{ route('admin.tickets.bulk.assign') }}" id="assignForm">
+      <form method="POST" action="{{ route('tickets.bulk.assign') }}" id="assignForm">
         @csrf
         <div class="modal-body">
           <input type="hidden" name="ticket_ids" id="assignTicketIds">
@@ -225,7 +225,7 @@
         <h5 class="modal-title">Ubah Status Tiket</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <form method="POST" action="{{ route('admin.tickets.bulk.status') }}" id="statusForm">
+      <form method="POST" action="{{ route('tickets.bulk.status') }}" id="statusForm">
         @csrf
         <div class="modal-body">
           <input type="hidden" name="ticket_ids" id="statusTicketIds">

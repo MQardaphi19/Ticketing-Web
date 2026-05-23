@@ -11,7 +11,7 @@
                 <div class="card-body p-4">
                     <h5 class="mb-4 fw-semibold">Formulir Permohonan</h5>
 
-                    <form method="POST" action="{{ route('admin.tickets.store') }}" id="ticketForm">
+                    <form method="POST" action="{{ route('tickets.store') }}" id="ticketForm" enctype="multipart/form-data">
                         @csrf
 
                         <div class="mb-3">
@@ -65,6 +65,12 @@
                                 accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
                             <div class="form-text">Maksimal 5 file, ukuran masing-masing maksimal 5MB. Format: JPG, PNG,
                                 PDF, DOC, DOCX</div>
+                            @error('attachments')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                            @error('attachments.*')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
                             <div id="attachmentPreview" class="mt-2"></div>
                         </div>
 
@@ -84,7 +90,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <iconify-icon icon="solar:send-linear" class="me-2"></iconify-icon>Kirim Permohonan
                             </button>
-                            <a href="{{ route('admin.tickets.my') }}" class="btn btn-light">
+                            <a href="{{ route('tickets.my') }}" class="btn btn-light">
                                 <iconify-icon icon="solar:close-circle-linear" class="me-2"></iconify-icon>Batal
                             </a>
                         </div>
@@ -184,10 +190,33 @@
         document.getElementById('attachments').addEventListener('change', function(e) {
             const files = e.target.files;
             const preview = document.getElementById('attachmentPreview');
+            const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'];
+            const maxFiles = 5;
+            const maxSize = 5 * 1024 * 1024;
             preview.innerHTML = '';
+
+            if (files.length > maxFiles) {
+                preview.innerHTML = '<div class="alert alert-danger py-2 mb-0">Maksimal 5 file yang dapat diunggah.</div>';
+                e.target.value = '';
+                return;
+            }
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
+                const extension = file.name.split('.').pop().toLowerCase();
+
+                if (!allowedExtensions.includes(extension)) {
+                    preview.innerHTML = '<div class="alert alert-danger py-2 mb-0">Format file tidak didukung. Gunakan JPG, PNG, PDF, DOC, atau DOCX.</div>';
+                    e.target.value = '';
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    preview.innerHTML = '<div class="alert alert-danger py-2 mb-0">Ukuran tiap file maksimal 5MB.</div>';
+                    e.target.value = '';
+                    return;
+                }
+
                 const fileSize = (file.size / 1024).toFixed(2);
                 preview.innerHTML += `
         <div class="d-flex align-items-center gap-2 mb-2 p-2 bg-light rounded">
@@ -196,9 +225,6 @@
             <small class="fw-medium">${file.name}</small>
             <small class="text-muted d-block">${fileSize} KB</small>
           </div>
-          <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.parentElement.remove()">
-            <iconify-icon icon="solar:trash-bin-linear"></iconify-icon>
-          </button>
         </div>
       `;
             }
@@ -251,7 +277,7 @@
         }
 
         function processChatbotPrediction(message) {
-            fetch('/admin/chatbot/predict', {
+            fetch('/chatbot/predict', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -298,7 +298,7 @@
             if (confirm('Apakah Anda yakin ingin menghapus data latih ini?')) {
                 setLoading(true);
 
-                fetch('{{ route('admin.knowledge.destroy', ':id') }}'.replace(':id', id), {
+                fetch('{{ route('knowledge.destroy', ':id') }}'.replace(':id', id), {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -368,7 +368,7 @@
             // trainText.textContent = 'Melatih...';
             trainIcon.setAttribute('icon', 'mdi:refresh');
 
-            fetch('/admin/train-model', {
+            fetch('/train-model', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -408,8 +408,8 @@
             const knowledgeId = formData.get('knowledge_id');
             const method = formData.get('_method');
             const url = method === 'PUT' ?
-                '{{ route('admin.knowledge.update', ':id') }}'.replace(':id', knowledgeId) :
-                '{{ route('admin.knowledge.store') }}';
+                '{{ route('knowledge.update', ':id') }}'.replace(':id', knowledgeId) :
+                '{{ route('knowledge.store') }}';
 
             submitBtn.disabled = true;
             cancelBtn.disabled = true;

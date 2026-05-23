@@ -426,7 +426,7 @@
 
       <p>
         Belum punya akun?
-        <a href="#">
+        <a href="{{ route('register') }}">
           Daftar sekarang
         </a>
       </p>

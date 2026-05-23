@@ -191,7 +191,7 @@
             if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
                 setLoading(true);
 
-                fetch('{{ route('admin.categories.destroy', ':id') }}'.replace(':id', id), {
+                fetch('{{ route('categories.destroy', ':id') }}'.replace(':id', id), {
                         method: 'DELETE',
                         headers: {
                             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -230,8 +230,8 @@
             const categoryId = formData.get('category_id');
             const method = formData.get('_method');
             const url = method === 'PUT' ?
-                '{{ route('admin.categories.update', ':id') }}'.replace(':id', categoryId) :
-                '{{ route('admin.categories.store') }}';
+                '{{ route('categories.update', ':id') }}'.replace(':id', categoryId) :
+                '{{ route('categories.store') }}';
 
             submitBtn.disabled = true;
             cancelBtn.disabled = true;

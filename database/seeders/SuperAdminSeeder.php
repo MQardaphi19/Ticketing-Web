@@ -43,18 +43,6 @@ class SuperAdminSeeder extends Seeder
         );
         $kepala->assignRole('kepala-diskominfo');
 
-        $pertanian = User::firstOrCreate(
-            ['email' => 'pertanian@diskominfo.go.id'],
-            [
-                'name' => 'Pertanian',
-                'password' => 'passwordpertanian',
-                'nip' => '2222222222',
-                'department' => 'Pertanian',
-                'phone' => '081234567890',
-                'role' => 'pegawai-dinas',
-                'status' => 'active',
-            ]
-        );
-        $pertanian->assignRole('pegawai-dinas');
+        
     }
 }

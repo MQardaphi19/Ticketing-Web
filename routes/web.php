@@ -9,26 +9,33 @@ use App\Http\Controllers\CategoryController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RolePermissionController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Require auth untuk semua route ticket
-Route::middleware(['auth', 'role:admin'])->prefix("admin")->name("admin.")->group(function () {
+// // Require auth untuk semua route ticket
+Route::middleware(['auth'])->group(function () {
+    Route::get('test', function () {
+        return "Test";
+    });
+
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('tickets')->name('tickets.')->group(function () {
         Route::get('/my', [TicketController::class, 'my'])->name('my');
         Route::get('/create', [TicketController::class, 'create'])->name('create');
         Route::post('/', [TicketController::class, 'store'])->name('store');
         Route::get('/', [TicketController::class, 'index'])->name('index');
+        Route::get('/{ticket}/attachments/{attachment}/download', [TicketController::class, 'downloadAttachment'])->name('attachments.download');
+        Route::get('/{ticket}/messages', [TicketController::class, 'messages'])->name('messages.index');
+        Route::post('/{ticket}/messages', [TicketController::class, 'storeMessage'])->name('messages.store');
         Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
         Route::put('/{ticket}', [TicketController::class, 'update'])->name('update');
         Route::delete('/{ticket}', [TicketController::class, 'destroy'])->name('destroy');
-        Route::post('/{ticket}/messages', [TicketController::class, 'storeMessage']);
         Route::post('/bulk/assign', [TicketController::class, 'bulkAssign'])->name('bulk.assign');
         Route::post('/bulk/status', [TicketController::class, 'bulkStatus'])->name('bulk.status');
     });
@@ -62,6 +69,7 @@ Route::middleware(['auth', 'role:admin'])->prefix("admin")->name("admin.")->grou
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
         Route::post('/', [UserController::class, 'store'])->name('store');
+        Route::put('/{user}/password', [UserController::class, 'resetPassword'])->name('password.reset');
         Route::put('/{user}', [UserController::class, 'update'])->name('update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
     });
@@ -78,38 +86,32 @@ Route::middleware(['auth', 'role:admin'])->prefix("admin")->name("admin.")->grou
     Route::get('/datatable', [TicketController::class, 'datatable'])
         ->name('datatable');
 
-    // Comments
-    Route::post('/{ticket}/comments', [TicketCommentController::class, 'store'])
-        ->name('comments.store');
+    // // Comments
+    // Route::post('/{ticket}/comments', [TicketCommentController::class, 'store'])
+    //     ->name('comments.store');
 
-    Route::put('/comments/{comment}', [TicketCommentController::class, 'update'])
-        ->name('comments.update');
+    // Route::put('/comments/{comment}', [TicketCommentController::class, 'update'])
+    //     ->name('comments.update');
 
-    Route::delete('/comments/{comment}', [TicketCommentController::class, 'destroy'])
-        ->name('comments.destroy');
-});
+    // Route::delete('/comments/{comment}', [TicketCommentController::class, 'destroy'])
+    //     ->name('comments.destroy');
 
-Route::middleware(['auth', 'role:kepala-diskominfo'])->prefix("kepala")->name("kepala.")->group(function () {
-    Route::get('/dashboard', function () {
-        return "Ini adalah dashboard untuk Kepala Dinas Kominfo";
-    })->name('dashboard');
-});
-
-Route::middleware(['auth', 'role:pegawai-dinas'])->prefix("pegawai")->name("pegawai.")->group(function () {
-    Route::get('/dashboard', function () {
-        return "Ini adalah dashboard untuk Pegawai Dinas";
-    })->name('dashboard');
+    // Role and Permission Management
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/roles', [RolePermissionController::class, 'index'])->name('roles.index');
+        Route::post('/roles/{role}', [RolePermissionController::class, 'update'])->name('roles.update');
+    });
 });
 
 
 
 
-// API Routes (untuk SPA/Mobile App)
-Route::middleware(['auth:api'])->prefix('api/v1')->group(function () {
-    Route::apiResource('tickets', TicketApiControlller::class);
-    Route::get('/tickets/{ticket}/comments', [CommentApiController::class, 'index']);
-    Route::post('/tickets/{ticket}/comments', [CommentApiController::class, 'store']);
-});
+// // API Routes (untuk SPA/Mobile App)
+// Route::middleware(['auth:api'])->prefix('api/v1')->group(function () {
+//     Route::apiResource('tickets', TicketApiControlller::class);
+//     Route::get('/tickets/{ticket}/comments', [CommentApiController::class, 'index']);
+//     Route::post('/tickets/{ticket}/comments', [CommentApiController::class, 'store']);
+// });
 
 Route::post('/logout', function () {
     Auth::guard('web')->logout();

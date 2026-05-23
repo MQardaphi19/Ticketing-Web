@@ -4,17 +4,24 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Ticket;
-use App\Models\TicketMessage;
+use App\Models\TicketAttachment;
+use App\Models\TicketComment;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TicketController extends Controller
 {
-    public function my(): \Illuminate\View\View
+    public function my(): View
     {
         $tickets = Ticket::with(['user', 'category', 'assignedTechnician'])
+            ->withCount('attachments')
             ->where('user_id', Auth::id())
             ->latest()
             ->get();
@@ -22,16 +29,17 @@ class TicketController extends Controller
         return view('tickets.my', compact('tickets'));
     }
 
-    public function create(): \Illuminate\View\View
+    public function create(): View
     {
         $categories = Category::all();
 
         return view('tickets.create', compact('categories'));
     }
 
-    public function index(Request $request): \Illuminate\View\View
+    public function index(Request $request): View
     {
-        $query = Ticket::with(['user', 'category', 'assignedTechnician']);
+        $query = Ticket::with(['user', 'category', 'assignedTechnician'])
+            ->withCount('attachments');
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -52,9 +60,9 @@ class TicketController extends Controller
         return view('tickets.index', compact('tickets', 'categories', 'technicians'));
     }
 
-    public function show(int $id): \Illuminate\View\View
+    public function show(int $id): View
     {
-        $ticket = Ticket::with(['user', 'category', 'assignedTechnician', 'messages.user'])
+        $ticket = Ticket::with(['user', 'category', 'assignedTechnician', 'attachments.user', 'messages.user'])
             ->findOrFail($id);
 
         $technicians = User::where('role', 'teknisi')->get();
@@ -62,9 +70,10 @@ class TicketController extends Controller
         return view('tickets.show', compact('ticket', 'technicians'));
     }
 
-    public function assigned(): \Illuminate\View\View
+    public function assigned(): View
     {
         $tickets = Ticket::with(['user', 'category'])
+            ->withCount('attachments')
             ->where('assigned_to', Auth::id())
             ->latest()
             ->get();
@@ -72,28 +81,85 @@ class TicketController extends Controller
         return view('tickets.my', compact('tickets'));
     }
 
-    public function store(Request $request): \Illuminate\Http\RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
             'description' => 'required|string',
             'category_id' => 'required|exists:categories,id',
             'priority' => 'required|in:low,medium,high',
+            'attachments' => 'nullable|array|max:5',
+            'attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx',
         ]);
 
         $category = Category::findOrFail($validated['category_id']);
+        $files = $request->file('attachments', []);
+        unset($validated['attachments']);
 
         $validated['user_id'] = Auth::id();
-        $validated['ticket_number'] = 'TIX-' . now()->format('Ym') . '-' . str_pad(Ticket::count() + 1, 3, '0', STR_PAD_LEFT);
+        $validated['ticket_number'] = 'TIX-'.now()->format('Ym').'-'.str_pad(Ticket::count() + 1, 3, '0', STR_PAD_LEFT);
         $validated['status'] = 'open';
         $validated['sla_due_date'] = now()->addHours($category->sla_hours);
 
-        Ticket::create($validated);
+        $storedFiles = [];
 
-        return redirect()->route('admin.tickets.my')->with('success', 'Tiket berhasil dibuat');
+        try {
+            DB::transaction(function () use ($validated, $files, &$storedFiles): void {
+                $ticket = Ticket::create($validated);
+
+                foreach ($files as $file) {
+                    $path = $file->store("tickets/{$ticket->id}/attachments", 'local');
+
+                    if (! $path) {
+                        throw new \RuntimeException('Attachment file could not be stored.');
+                    }
+
+                    $storedFiles[] = $path;
+
+                    $ticket->attachments()->create([
+                        'user_id' => Auth::id(),
+                        'disk' => 'local',
+                        'path' => $path,
+                        'original_name' => $file->getClientOriginalName(),
+                        'stored_name' => basename($path),
+                        'mime_type' => $file->getMimeType(),
+                        'extension' => strtolower($file->getClientOriginalExtension()),
+                        'size' => $file->getSize(),
+                    ]);
+                }
+            });
+        } catch (\Throwable $exception) {
+            foreach ($storedFiles as $path) {
+                Storage::disk('local')->delete($path);
+            }
+
+            report($exception);
+
+            return back()
+                ->withInput()
+                ->withErrors(['attachments' => 'Lampiran gagal disimpan. Silakan coba lagi.']);
+        }
+
+        return redirect()->route('tickets.my')->with('success', 'Tiket berhasil dibuat');
     }
 
-    public function update(Request $request, int $id): \Illuminate\Http\RedirectResponse
+    public function downloadAttachment(Ticket $ticket, TicketAttachment $attachment): StreamedResponse
+    {
+        abort_unless($attachment->ticket_id === $ticket->id, 404);
+
+        $user = Auth::user();
+        $canDownload = $ticket->user_id === $user->id
+            || (string) $ticket->assigned_to === (string) $user->id
+            || $user->isAdmin()
+            || $user->isStaff();
+
+        abort_unless($canDownload, 403);
+        abort_unless(Storage::disk($attachment->disk)->exists($attachment->path), 404);
+
+        return Storage::disk($attachment->disk)->download($attachment->path, $attachment->original_name);
+    }
+
+    public function update(Request $request, int $id): RedirectResponse
     {
         $ticket = Ticket::findOrFail($id);
 
@@ -119,7 +185,7 @@ class TicketController extends Controller
         return back()->with('success', 'Tiket berhasil diperbarui');
     }
 
-    public function destroy(int $id): \Illuminate\Http\RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
         $ticket = Ticket::findOrFail($id);
 
@@ -128,23 +194,74 @@ class TicketController extends Controller
         return back()->with('success', 'Tiket berhasil dihapus');
     }
 
-    public function storeMessage(Request $request, int $id): JsonResponse
+    public function messages(Request $request, Ticket $ticket): JsonResponse
     {
+        abort_unless($this->canAccessTicketChat($ticket), 403);
+
+        $afterId = max((int) $request->query('after_id', 0), 0);
+
+        $messages = $ticket->messages()
+            ->with('user')
+            ->when($afterId > 0, fn ($query) => $query->where('id', '>', $afterId))
+            ->orderBy('id')
+            ->limit(50)
+            ->get();
+
+        return response()->json([
+            'data' => $messages->map(fn (TicketComment $message) => $this->formatMessage($message))->values(),
+            'meta' => [
+                'last_id' => $messages->last()?->id ?? $afterId,
+            ],
+        ]);
+    }
+
+    public function storeMessage(Request $request, Ticket $ticket): JsonResponse
+    {
+        abort_unless($this->canAccessTicketChat($ticket), 403);
+
         $validated = $request->validate([
-            'message' => 'required|string',
+            'content' => 'required|string|max:2000',
             'is_internal' => 'nullable|boolean',
         ]);
 
-        $validated['ticket_id'] = $id;
-        $validated['user_id'] = Auth::id();
-        $validated['is_internal'] = $request->boolean('is_internal', false);
+        $message = $ticket->messages()->create([
+            'user_id' => Auth::id(),
+            'content' => $validated['content'],
+            'is_internal' => $request->boolean('is_internal', false),
+        ])->load('user');
 
-        $message = TicketMessage::create($validated);
-
-        return response()->json(['message' => 'Pesan berhasil dikirim', 'data' => $message->load('user')]);
+        return response()->json([
+            'message' => 'Pesan berhasil dikirim',
+            'data' => $this->formatMessage($message),
+        ], 201);
     }
 
-    public function bulkAssign(Request $request): \Illuminate\Http\RedirectResponse
+    private function canAccessTicketChat(Ticket $ticket): bool
+    {
+        $user = Auth::user();
+
+        if ($user->isAdmin() || $user->isKepalaDiskominfo()) {
+            return true;
+        }
+
+        return $user->isPegawaiDinas() && $ticket->user_id === $user->id;
+    }
+
+    private function formatMessage(TicketComment $message): array
+    {
+        return [
+            'id' => $message->id,
+            'ticket_id' => $message->ticket_id,
+            'user_id' => $message->user_id,
+            'user_name' => $message->user?->name,
+            'content' => $message->content,
+            'is_internal' => $message->is_internal,
+            'created_at' => $message->created_at?->toISOString(),
+            'created_at_time' => $message->created_at?->format('H:i'),
+        ];
+    }
+
+    public function bulkAssign(Request $request): RedirectResponse
     {
 
         Ticket::where('id', $request->ticket_ids)->update([
@@ -155,7 +272,7 @@ class TicketController extends Controller
         return back()->with('success', 'Teknisi berhasil ditugaskan');
     }
 
-    public function bulkStatus(Request $request): \Illuminate\Http\RedirectResponse
+    public function bulkStatus(Request $request): RedirectResponse
     {
         Ticket::where('id', $request->ticket_ids)->update([
             'assigned_to' => $request->assigned_to,
