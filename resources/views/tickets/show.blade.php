@@ -171,8 +171,7 @@
                     <div class="card-body p-4">
                         <h6 class="fw-semibold mb-3">Teknisi Penanggung Jawab</h6>
                         <div class="d-flex align-items-center gap-3">
-                            <img src="{{ asset('assets/images/profile/user-2.jpg') }}" class="rounded-circle"
-                                width="50" height="50">
+                            
                             <div>
                                 <h6 class="mb-0 fw-medium">{{ $ticket->assignedTechnician?->name ?? $ticket->assigned_to }}</h6>
                                 <p class="text-muted mb-0 small">{{ $ticket->assignedTechnician?->department }}</p>
@@ -239,7 +238,7 @@
                             <div class="d-flex gap-3">
                                 <div class="flex-shrink-0">
                                     <div class="bg-warning rounded-circle p-1">
-                                        <iconify-icon icon="solar:hourglass-circle-linear"
+                                        <iconify-icon icon="solar:clock-circle-outline"
                                             class="text-white fs-5"></iconify-icon>
                                     </div>
                                 </div>

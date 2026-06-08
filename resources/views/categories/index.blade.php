@@ -99,6 +99,7 @@
         </div>
     </div>
 
+    {{-- MODAL TAMBAH & EDIT --}}
     <div class="modal fade" id="categoryModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -111,19 +112,23 @@
                     <div class="modal-body">
                         <input type="hidden" name="category_id" id="categoryId">
                         <input type="hidden" name="_method" value="POST" id="formMethod">
+
                         <div class="mb-3">
                             <label class="form-label">Nama Kategori <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="name" id="categoryName" required>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Slug</label>
                             <input type="text" class="form-control" name="slug" id="categorySlug" readonly>
                             <div class="form-text">Slug akan di-generate otomatis dari nama kategori</div>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Deskripsi</label>
                             <textarea class="form-control" name="description" id="categoryDescription" rows="3"></textarea>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">SLA (Jam) <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" name="sla_hours" id="categorySla" required
@@ -131,15 +136,68 @@
                             <div class="form-text">Target waktu penyelesaian dalam jam (maksimal 168 jam / 7 hari)</div>
                         </div>
                     </div>
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal"
                             id="cancelBtn">Batal</button>
+
                         <button type="submit" class="btn btn-primary" id="submitBtn">
                             <iconify-icon icon="mdi:send" class="me-2" id="submitIcon"></iconify-icon>
                             <span id="submitText">Simpan</span>
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- MODAL HAPUS --}}
+    <div class="modal fade" id="deleteCategoryModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-semibold text-danger">
+                        <iconify-icon icon="mdi:alert-circle" class="me-2"></iconify-icon>
+                        Hapus Kategori
+                    </h5>
+
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body text-center py-4">
+
+                    <div class="mb-4">
+                        <div class="bg-danger-subtle rounded-circle d-inline-flex p-4">
+                            <iconify-icon icon="mdi:delete-outline"
+                                class="text-danger fs-1"></iconify-icon>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-semibold mb-2">
+                        Yakin ingin menghapus kategori ini?
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Data kategori yang dihapus tidak dapat dikembalikan kembali.
+                    </p>
+
+                    <input type="hidden" id="deleteCategoryId">
+                </div>
+
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light"
+                        data-bs-dismiss="modal">
+                        Batal
+                    </button>
+
+                    <button type="button" class="btn btn-danger"
+                        onclick="confirmDeleteCategory()">
+                        <iconify-icon icon="mdi:delete" class="me-2"></iconify-icon>
+                        Hapus
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
@@ -157,133 +215,171 @@
 @endsection
 
 @push('scripts')
-    <script>
-        document.getElementById('categoryName').addEventListener('input', function() {
-            const slug = this.value.toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/(^-|-$)/g, '');
-            document.getElementById('categorySlug').value = slug;
-        });
+<script>
+    document.getElementById('categoryName').addEventListener('input', function() {
+        const slug = this.value.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
 
-        function openCreateModal() {
-            document.getElementById('modalTitle').textContent = 'Tambah Kategori';
-            document.getElementById('formMethod').value = 'POST';
-            document.getElementById('categoryId').value = '';
-            document.getElementById('categoryName').value = '';
-            document.getElementById('categorySlug').value = '';
-            document.getElementById('categoryDescription').value = '';
-            document.getElementById('categorySla').value = '';
-            new bootstrap.Modal(document.getElementById('categoryModal')).show();
-        }
+        document.getElementById('categorySlug').value = slug;
+    });
 
-        function openEditModal(id, name, slug, description, sla) {
-            document.getElementById('modalTitle').textContent = 'Edit Kategori';
-            document.getElementById('formMethod').value = 'PUT';
-            document.getElementById('categoryId').value = id;
-            document.getElementById('categoryName').value = name;
-            document.getElementById('categorySlug').value = slug;
-            document.getElementById('categoryDescription').value = description;
-            document.getElementById('categorySla').value = sla;
-            new bootstrap.Modal(document.getElementById('categoryModal')).show();
-        }
+    function openCreateModal() {
+        document.getElementById('modalTitle').textContent = 'Tambah Kategori';
+        document.getElementById('formMethod').value = 'POST';
+        document.getElementById('categoryId').value = '';
+        document.getElementById('categoryName').value = '';
+        document.getElementById('categorySlug').value = '';
+        document.getElementById('categoryDescription').value = '';
+        document.getElementById('categorySla').value = '';
 
-        function deleteCategory(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus kategori ini?')) {
-                setLoading(true);
+        new bootstrap.Modal(document.getElementById('categoryModal')).show();
+    }
 
-                fetch('{{ route('categories.destroy', ':id') }}'.replace(':id', id), {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('Category delete response:', data);
-                        showToast('success', data.message || 'Kategori berhasil dihapus');
-                        const item = document.querySelector(`.category-item[data-id="${id}"]`);
-                        if (item) {
-                            item.style.opacity = '0';
-                            setTimeout(() => item.remove(), 300);
-                        }
-                    })
-                    .catch(error => {
-                        showToast('error', 'Gagal menghapus kategori. Silakan coba lagi.');
-                    })
-                    .finally(() => {
-                        setLoading(false);
-                    });
-            }
-        }
+    function openEditModal(id, name, slug, description, sla) {
+        document.getElementById('modalTitle').textContent = 'Edit Kategori';
+        document.getElementById('formMethod').value = 'PUT';
+        document.getElementById('categoryId').value = id;
+        document.getElementById('categoryName').value = name;
+        document.getElementById('categorySlug').value = slug;
+        document.getElementById('categoryDescription').value = description;
+        document.getElementById('categorySla').value = sla;
 
-        document.getElementById('categoryForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+        new bootstrap.Modal(document.getElementById('categoryModal')).show();
+    }
 
-            const submitBtn = document.getElementById('submitBtn');
-            const submitText = document.getElementById('submitText');
-            const submitIcon = document.getElementById('submitIcon');
-            const cancelBtn = document.getElementById('cancelBtn');
+    // POPUP HAPUS BARU
+    function deleteCategory(id) {
+        document.getElementById('deleteCategoryId').value = id;
 
-            const formData = new FormData(this);
-            const categoryId = formData.get('category_id');
-            const method = formData.get('_method');
-            const url = method === 'PUT' ?
-                '{{ route('categories.update', ':id') }}'.replace(':id', categoryId) :
-                '{{ route('categories.store') }}';
+        new bootstrap.Modal(document.getElementById('deleteCategoryModal')).show();
+    }
 
-            submitBtn.disabled = true;
-            cancelBtn.disabled = true;
-            submitText.textContent = method === 'PUT' ? 'Memperbarui...' : 'Menyimpan...';
-            submitIcon.setAttribute('icon', 'solar:refresh-linear');
+    // KONFIRMASI HAPUS
+    function confirmDeleteCategory() {
 
-            fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'X-HTTP-Method-Override': method,
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Category save response:', data);
-                    bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
-                    showToast('success', data.message || (method === 'PUT' ? 'Kategori berhasil diperbarui' :
-                        'Kategori berhasil ditambahkan'));
-                    setTimeout(() => location.reload(), 1000);
-                })
-                .catch(error => {
-                    showToast('error', 'Gagal menyimpan kategori. Silakan coba lagi.');
-                    submitBtn.disabled = false;
-                    cancelBtn.disabled = false;
-                    submitText.textContent = method === 'PUT' ? 'Simpan Perubahan' : 'Simpan';
-                    submitIcon.setAttribute('icon', 'solar:paper-plane-linear');
-                });
-        });
+        const id = document.getElementById('deleteCategoryId').value;
 
-        function showToast(type, message) {
-            const toast = document.getElementById('toast');
-            const toastMessage = document.getElementById('toastMessage');
+        setLoading(true);
 
-            toast.className =
+        fetch('{{ route('categories.destroy', ':id') }}'.replace(':id', id), {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal')).hide();
+
+                showToast('success', 'Kategori berhasil dihapus');
+
+                const item = document.querySelector(`.category-item[data-id="${id}"]`);
+
+                if (item) {
+                    item.style.opacity = '0';
+
+                    setTimeout(() => item.remove(), 300);
+                }
+            })
+            .catch(error => {
+                showToast('error', 'Gagal menghapus kategori. Silakan coba lagi.');
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+
+    document.getElementById('categoryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const submitIcon = document.getElementById('submitIcon');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        const formData = new FormData(this);
+        const categoryId = formData.get('category_id');
+        const method = formData.get('_method');
+
+        const url = method === 'PUT' ?
+            '{{ route('categories.update', ':id') }}'.replace(':id', categoryId) :
+            '{{ route('categories.store') }}';
+
+        submitBtn.disabled = true;
+        cancelBtn.disabled = true;
+
+        submitText.textContent = method === 'PUT' ? 'Memperbarui...' : 'Menyimpan...';
+
+        submitIcon.setAttribute('icon', 'solar:refresh-linear');
+
+        fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'X-HTTP-Method-Override': method,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                bootstrap.Modal.getInstance(document.getElementById('categoryModal')).hide();
+
+                showToast('success', data.message || (
+                    method === 'PUT'
+                    ? 'Kategori berhasil diperbarui'
+                    : 'Kategori berhasil ditambahkan'
+                ));
+
+                setTimeout(() => location.reload(), 1000);
+            })
+            .catch(error => {
+
+                showToast('error', 'Gagal menyimpan kategori. Silakan coba lagi.');
+
+                submitBtn.disabled = false;
+                cancelBtn.disabled = false;
+
+                submitText.textContent = method === 'PUT'
+                    ? 'Simpan Perubahan'
+                    : 'Simpan';
+
+                submitIcon.setAttribute('icon', 'solar:paper-plane-linear');
+            });
+    });
+
+    function showToast(type, message) {
+
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        toast.className =
             `toast align-items-center text-white border-0 bg-${type === 'success' ? 'success' : 'danger'}`;
-            toastMessage.textContent = message;
 
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-        }
+        toastMessage.textContent = message;
 
-        function setLoading(loading) {
-            const btn = document.getElementById('addCategoryBtn');
-            if (btn) {
-                btn.disabled = loading;
-                btn.innerHTML = loading ?
-                    '<span class="spinner-border spinner-border-sm me-2"></span>Memuat...' :
-                    '<iconify-icon icon="mdi:plus-circle" class="me-2"></iconify-icon>Tambah Kategori';
-            }
+        const bsToast = new bootstrap.Toast(toast);
+
+        bsToast.show();
+    }
+
+    function setLoading(loading) {
+
+        const btn = document.getElementById('addCategoryBtn');
+
+        if (btn) {
+
+            btn.disabled = loading;
+
+            btn.innerHTML = loading
+                ? '<span class="spinner-border spinner-border-sm me-2"></span>Memuat...'
+                : '<iconify-icon icon="mdi:plus-circle" class="me-2"></iconify-icon>Tambah Kategori';
         }
-    </script>
+    }
+</script>
 @endpush

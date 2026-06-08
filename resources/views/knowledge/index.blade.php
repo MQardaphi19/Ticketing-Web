@@ -261,6 +261,56 @@
         </div>
     </div>
 
+
+<!-- Modal Hapus Data Latih -->
+<div class="modal fade" id="deleteKnowledgeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+
+            <div class="modal-body text-center p-5">
+
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-danger-subtle"
+                        style="width:90px;height:90px;">
+                        <iconify-icon icon="mdi:delete-alert-outline"
+                            class="text-danger"
+                            style="font-size:48px;">
+                        </iconify-icon>
+                    </div>
+                </div>
+
+                <h4 class="fw-bold mb-2">
+                    Hapus Data Latih?
+                </h4>
+
+                <p class="text-muted mb-4">
+                    Data latih yang dihapus tidak dapat dikembalikan kembali.
+                    Pastikan data yang dipilih memang ingin dihapus.
+                </p>
+
+                <input type="hidden" id="deleteKnowledgeId">
+
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button"
+                        class="btn btn-light px-4"
+                        data-bs-dismiss="modal">
+                        Batal
+                    </button>
+
+                    <button type="button"
+                        class="btn btn-danger px-4"
+                        onclick="confirmDeleteKnowledge()">
+                        <iconify-icon icon="mdi:delete-outline" class="me-1"></iconify-icon>
+                        Ya, Hapus
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
     <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 9999;">
         <div id="toast" class="toast align-items-center text-white border-0" role="alert" aria-live="assertive"
             aria-atomic="true">
@@ -295,58 +345,81 @@
         }
 
         function deleteKnowledge(id) {
-            if (confirm('Apakah Anda yakin ingin menghapus data latih ini?')) {
-                setLoading(true);
+    document.getElementById('deleteKnowledgeId').value = id;
 
-                fetch('{{ route('knowledge.destroy', ':id') }}'.replace(':id', id), {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                    .then(response => response.json()).then(data => {
-                        showToast('success', data.message || 'Data latih berhasil dihapus');
+    new bootstrap.Modal(
+        document.getElementById('deleteKnowledgeModal')
+    ).show();
+}
 
-                        const item = document.querySelector(`.knowledge-item[data-id="${id}"]`);
+function confirmDeleteKnowledge() {
 
-                        if (item) {
-                            item.style.opacity = '0';
+    const id = document.getElementById('deleteKnowledgeId').value;
 
-                            setTimeout(() => {
-                                item.remove();
-                            }, 300);
-                        }
-                    })
-                    .catch(error => {
-                        showToast('error', 'Gagal menghapus data latih. Silakan coba lagi.');
-                    })
-                    .finally(() => {
-                        setLoading(false);
-                    });
-            }
+    bootstrap.Modal.getInstance(
+        document.getElementById('deleteKnowledgeModal')
+    ).hide();
+
+    setLoading(true);
+
+    fetch('{{ route('knowledge.destroy', ':id') }}'.replace(':id', id), {
+        method: 'DELETE',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Content-Type': 'application/json'
         }
+    })
+    .then(response => response.json())
+    .then(data => {
+
+        showToast(
+            'success',
+            data.message || 'Data latih berhasil dihapus'
+        );
+
+        const item = document.querySelector(
+            `.knowledge-item[data-id="${id}"]`
+        );
+
+        if (item) {
+            item.style.opacity = '0';
+
+            setTimeout(() => {
+                item.remove();
+            }, 300);
+        }
+    })
+    .catch(error => {
+        showToast(
+            'error',
+            'Gagal menghapus data latih. Silakan coba lagi.'
+        );
+    })
+    .finally(() => {
+        setLoading(false);
+    });
+}
 
         function exportDataset() {
             setLoading('export', true);
 
-            fetch('/admin/export-dataset', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    showToast('success', data.message || 'Dataset berhasil diexport');
-                })
-                .catch(error => {
-                    showToast('error', 'Terjadi kesalahan saat export dataset.');
-                })
-                .finally(() => {
-                    setLoading('export', false);
-                });
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route('knowledge.export-dataset') }}';
+            form.style.display = 'none';
+
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_token';
+            csrfInput.value = document.querySelector('meta[name="csrf-token"]').content;
+
+            form.appendChild(csrfInput);
+            document.body.appendChild(form);
+            form.submit();
+            form.remove();
+
+            showToast('success', 'Download dataset Excel dimulai.');
+            setTimeout(() => setLoading('export', false), 1500);
         }
 
         function openTrainModal() {
@@ -368,7 +441,7 @@
             // trainText.textContent = 'Melatih...';
             trainIcon.setAttribute('icon', 'mdi:refresh');
 
-            fetch('/train-model', {
+            fetch('{{ route('knowledge.train-model') }}', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -460,7 +533,7 @@
                 if (btn) {
                     btn.disabled = loading;
                     btn.innerHTML = loading ?
-                        '<span class="spinner-border spinner-border-sm me-2"></span>Exporting...' :
+                        '<span class="spinner-border spinner-border-sm me-2"></span>Menyiapkan...' :
                         '<iconify-icon icon="mdi:download" class="me-2"></iconify-icon>Export Dataset';
                 }
             } else if (type === 'train') {

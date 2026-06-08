@@ -19,8 +19,6 @@ class PermissionSeeder extends Seeder
 
             "view tickets",
             "create tickets",
-            'update tickets',
-            'delete tickets',
             "view my tickets",
             "assign tickets",
             "change status tickets",
@@ -133,8 +131,6 @@ class PermissionSeeder extends Seeder
         $pegawaiDinas->givePermissionTo([
             'view dashboard',
             "create tickets",
-            'delete tickets',
-            'update tickets',
             'view my tickets',
             'view dashboard my tickets menu'
         ]);

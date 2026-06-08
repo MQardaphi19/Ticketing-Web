@@ -6,16 +6,253 @@
 
 @section('content')
 
-    <div class="mb-4">
-        <h1>Halo, <span class="text-primary font-">{{ auth()->user()->name }}</span></h1>
-        <p>Selamat datang di dashboard Anda!</p>
-    </div>
+<style>
+/* ===========================
+   DASHBOARD PREMIUM KOMINFO
+=========================== */
+
+.dashboard-card{
+    border:none !important;
+    border-radius:20px !important;
+    overflow:hidden;
+    background:linear-gradient(135deg,#1e3a8a 0%, #2563eb 100%) !important;
+    color:#fff !important;
+    box-shadow:0 12px 30px rgba(37,99,235,.25);
+    transition:all .3s ease;
+    position:relative;
+}
+
+.dashboard-card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 18px 40px rgba(37,99,235,.35);
+}
+
+.dashboard-card::before{
+    content:'';
+    position:absolute;
+    top:-50px;
+    right:-50px;
+    width:150px;
+    height:150px;
+    background:rgba(255,255,255,.08);
+    border-radius:50%;
+}
+
+.dashboard-card h6{
+    color:#ffffff !important;
+    font-size:16px;
+    font-weight:700;
+}
+
+.dashboard-card p{
+    color:rgba(255,255,255,.75) !important;
+    margin-bottom:0;
+}
+
+.dashboard-card h2{
+    color:#ffffff !important;
+    font-size:38px;
+    font-weight:800;
+    margin-top:20px;
+}
+
+.dashboard-card .bg-primary-subtle,
+.dashboard-card .bg-warning-subtle,
+.dashboard-card .bg-success-subtle{
+    background:rgba(255,255,255,.15) !important;
+    backdrop-filter:blur(10px);
+    width:56px;
+    height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.dashboard-card .text-primary,
+.dashboard-card .text-warning,
+.dashboard-card .text-success{
+    color:#ffffff !important;
+}
+
+/* Card Statistik */
+.dashboard-chart-card{
+    border:none !important;
+    border-radius:20px !important;
+    background:#ffffff;
+    box-shadow:0 10px 25px rgba(0,0,0,.05);
+}
+
+.dashboard-chart-card .card-body{
+    padding:28px;
+}
+
+.dashboard-chart-card h5{
+    font-weight:700;
+    color:#1e293b;
+}
+
+/* Card Table */
+.dashboard-table-card{
+    border:none !important;
+    border-radius:20px !important;
+    background:#ffffff;
+    box-shadow:0 10px 25px rgba(0,0,0,.05);
+}
+
+.dashboard-table-card .card-body{
+    padding:28px;
+}
+
+/* Hero Dashboard */
+.dashboard-hero{
+    background:linear-gradient(
+        135deg,
+        #1e3a8a,
+        #2563eb
+    );
+    border-radius:24px;
+    padding:35px 40px;
+    margin-bottom:30px;
+    box-shadow:0 15px 35px rgba(37,99,235,.25);
+    position:relative;
+    overflow:hidden;
+}
+
+.dashboard-hero::before{
+    content:'';
+    position:absolute;
+    width:250px;
+    height:250px;
+    background:rgba(255,255,255,.05);
+    border-radius:50%;
+    right:-80px;
+    top:-80px;
+}
+
+.dashboard-hero h1{
+    color:white;
+    font-weight:800;
+    margin-bottom:8px;
+}
+
+.dashboard-hero p{
+    color:rgba(255,255,255,.8);
+    margin-bottom:0;
+}
+
+/* Table */
+.table thead th{
+    border:none;
+    background:#f8fafc;
+    color:#334155;
+    font-weight:700;
+}
+
+.table tbody tr{
+    transition:.2s;
+}
+
+.table tbody tr:hover{
+    background:#f8fbff;
+}
+
+/* Badge Status */
+.badge{
+    border-radius:999px;
+    font-weight:600;
+    padding:8px 14px;
+}
+
+/* Chart Container */
+#ticketChart,
+#categoryChart{
+    min-height:350px;
+}
+
+
+
+/* Garis Chart */
+.dashboard-chart-card,
+.dashboard-table-card{
+    position:relative;
+
+    border:2px solid transparent;
+    border-radius:22px !important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ffffff 0%,
+            #f8fafc 45%,
+            #eef4ff 100%
+        ) padding-box,
+
+        linear-gradient(
+            135deg,
+            #1e3a8a,
+            #2563eb,
+            #60a5fa
+        ) border-box;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.06),
+        0 2px 8px rgba(15,23,42,.04);
+
+    transition:all .3s ease;
+}
+
+.dashboard-chart-card,
+.dashboard-table-card{
+    position:relative;
+    border-radius:22px !important;
+    background:#fff;
+    overflow:hidden;
+
+    box-shadow:
+        0 10px 30px rgba(15,23,42,.06),
+        0 2px 8px rgba(15,23,42,.04);
+}
+
+.dashboard-chart-card::before,
+.dashboard-table-card::before{
+    content:'';
+    position:absolute;
+    inset:0;
+    padding:2px;
+    border-radius:22px;
+
+    background:linear-gradient(
+        135deg,
+        #1e3a8a,
+        #2563eb,
+        #60a5fa
+    );
+
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+
+    -webkit-mask-composite:xor;
+            mask-composite:exclude;
+
+    pointer-events:none;
+}
+</style>
+
+
+    <div class="dashboard-hero">
+    <h1>Halo, {{ auth()->user()->name }}</h1>
+    <p>
+        Selamat datang di Sistem Ticketing Diskominfo.
+        Pantau tiket, performa layanan, dan aktivitas sistem secara real-time.
+    </p>
+</div>
 
     @can('view dashboard tickets menu')
         {{-- List Tickets Stats Menu --}}
         <div class="row">
             <div class="col-lg-4">
-                <div class="card overflow-hidden shadow-sm border-0">
+                <div class="card dashboard-card">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
@@ -32,7 +269,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card overflow-hidden shadow-sm border-0">
+                <div class="card dashboard-card">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
@@ -49,7 +286,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card overflow-hidden shadow-sm border-0">
+                <div class="card dashboard-card">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
@@ -67,7 +304,7 @@
         </div>
         <div class="row">
             <div class="col-lg-8">
-                <div class="card shadow-sm border-0">
+                <div class="card dashboard-chart-card">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="mb-0 fw-semibold">Statistik Tiket Bulanan</h5>
@@ -78,7 +315,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card shadow-sm border-0">
+                <div class="card dashboard-chart-card">
                     <div class="card-body p-4">
                         <h5 class="mb-4 fw-semibold">Distribusi Kategori</h5>
                         <div id="categoryChart"></div>
@@ -88,7 +325,7 @@
         </div>
         <div class="row">
             <div class="col-lg-8">
-                <div class="card shadow-sm border-0">
+                <div class="card dashboard-chart-card">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="mb-0 fw-semibold">Tiket Terbaru</h5>
@@ -129,7 +366,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card shadow-sm border-0">
+                <div class="card dashboard-chart-card">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="mb-0 fw-semibold">Prioritas Tiket</h5>
@@ -195,7 +432,7 @@
         @if (true)
             <div class="row mt-4">
                 <div class="col-lg-6">
-                    <div class="card shadow-sm border-0">
+                    <div class="card dashboard-chart-card">
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h5 class="mb-0 fw-semibold">Model AI Training</h5>
@@ -226,7 +463,7 @@
                 </div>
 
                 <div class="col-lg-6">
-                    <div class="card shadow-sm border-0">
+                    <div class="card dashboard-chart-card">
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-center mb-4">
                                 <h5 class="mb-0 fw-semibold">Performa Chatbot</h5>
@@ -273,7 +510,7 @@
 
         <div class="row">
             <div class="col-lg-4">
-                <div class="card overflow-hidden shadow-sm border-0">
+                <div class="card dashboard-card">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
@@ -290,7 +527,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card overflow-hidden shadow-sm border-0">
+                <div class="card dashboard-card">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
@@ -307,7 +544,7 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="card overflow-hidden shadow-sm border-0">
+                <div class="card dashboard-card">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-start justify-content-between">
                             <div>
@@ -326,7 +563,7 @@
 
         <div class="row">
             <div class="w-100">
-                <div class="card shadow-sm border-0">
+                <div class="card dashboard-chart-card">
                     <div class="card-body p-4">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h5 class="mb-0 fw-semibold">Tiket Terbaru</h5>

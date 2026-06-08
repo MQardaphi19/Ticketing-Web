@@ -59,12 +59,12 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('chatbot')->name('chatbot.')->group(function () {
         Route::get('/logs', [ChatbotController::class, 'logs'])->name('logs');
         Route::post('/predict', [ChatbotController::class, 'predict'])->name('predict');
+        Route::post('/validate', [ChatbotController::class, 'validatePrediction'])->name('validate');
     });
 
     // Admin AI Training Routes
-    Route::post('/export-dataset', [KnowledgeBaseController::class, 'exportDataset']);
-    Route::post('/train-model', [KnowledgeBaseController::class, 'trainModel']);
-    Route::post('/chatbot/validate', [ChatbotController::class, 'validatePrediction']);
+    Route::post('/export-dataset', [KnowledgeBaseController::class, 'exportDataset'])->name('knowledge.export-dataset');
+    Route::post('/train-model', [KnowledgeBaseController::class, 'trainModel'])->name('knowledge.train-model');
 
     Route::prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');

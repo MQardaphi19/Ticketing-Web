@@ -49,6 +49,428 @@
         .btn-sm iconify-icon {
             font-size: 1rem;
         }
+
+        /* ==================================================
+   SIDEBAR PREMIUM DISKOMINFO
+   ================================================== */
+
+.left-sidebar{
+    background: linear-gradient(
+        180deg,
+        #172554 0%,
+        #1e3a8a 45%,
+        #2563eb 100%
+    ) !important;
+
+    box-shadow: 8px 0 30px rgba(0,0,0,.12);
+}
+
+/* container sidebar */
+.left-sidebar > div{
+    background: transparent !important;
+}
+
+/* ==========================================
+   LOGO AREA
+========================================== */
+
+.brand-logo{
+    background: rgba(255,255,255,.06) !important;
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255,255,255,.12) !important;
+    min-height: 100px;
+}
+
+.brand-logo h5{
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.3;
+    margin-bottom: 0;
+}
+
+.brand-logo img{
+    filter: drop-shadow(0 3px 10px rgba(255,255,255,.15));
+}
+
+/* ==========================================
+   MENU SECTION TITLE
+========================================== */
+
+.nav-small-cap{
+    padding: 14px 22px 8px !important;
+    margin-top: 8px;
+}
+
+.nav-small-cap .hide-menu{
+    color: rgba(255,255,255,.75) !important;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.nav-small-cap iconify-icon{
+    color: rgba(255,255,255,.65) !important;
+}
+
+/* ==========================================
+   MENU ITEM
+========================================== */
+
+.sidebar-item{
+    margin-bottom: 6px;
+}
+
+.sidebar-link{
+    position: relative;
+
+    margin: 0 14px !important;
+    padding: 12px 18px !important;
+
+    border-radius: 16px;
+
+    color: rgba(255,255,255,.92) !important;
+
+    transition: all .25s ease;
+}
+
+.sidebar-link span{
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.sidebar-link iconify-icon{
+    color: rgba(255,255,255,.95) !important;
+    font-size: 20px;
+    margin-right: 12px;
+}
+
+/* hover */
+
+.sidebar-link:hover{
+    background: rgba(255,255,255,.10) !important;
+
+    transform: translateX(5px);
+
+    color: #ffffff !important;
+}
+
+/* ==========================================
+   ACTIVE MENU
+========================================== */
+
+.sidebar-item.selected .sidebar-link,
+.sidebar-item.active .sidebar-link{
+    background: #ffffff !important;
+
+    color: #1e40af !important;
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,.12);
+
+    font-weight: 700;
+}
+
+.sidebar-item.selected .sidebar-link iconify-icon,
+.sidebar-item.active .sidebar-link iconify-icon{
+    color: #2563eb !important;
+}
+
+/* garis aktif kiri */
+
+.sidebar-item.selected .sidebar-link::before,
+.sidebar-item.active .sidebar-link::before{
+    content: "";
+
+    position: absolute;
+
+    left: -14px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 5px;
+    height: 60%;
+
+    background: #ffffff;
+
+    border-radius: 20px;
+}
+
+/* ==========================================
+   DIVIDER
+========================================== */
+
+.sidebar-divider{
+    border-top: 1px solid rgba(255,255,255,.12) !important;
+    margin: 18px 20px !important;
+}
+
+/* ==========================================
+   FOOTER
+========================================== */
+
+.sidebar-footer{
+    background: rgba(255,255,255,.06) !important;
+
+    border-top: 1px solid rgba(255,255,255,.12) !important;
+
+    backdrop-filter: blur(12px);
+}
+
+.sidebar-footer p{
+    color: #ffffff !important;
+}
+
+/* ==========================================
+   LOGOUT
+========================================== */
+
+#logout-form .sidebar-link{
+    color: #ffffff !important;
+}
+
+#logout-form .sidebar-link:hover{
+    background: rgba(255,255,255,.10) !important;
+}
+
+/* ==========================================
+   SCROLLBAR
+========================================== */
+
+.simplebar-scrollbar:before{
+    background: rgba(255,255,255,.35) !important;
+}
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media(max-width:991px){
+
+    .sidebar-link{
+        margin: 0 10px !important;
+    }
+
+}
+
+/* ==========================================
+   CUSTOM SCROLLBAR SIDEBAR
+========================================== */
+
+/* Chrome, Edge, Safari */
+
+.sidebar-nav::-webkit-scrollbar,
+.simplebar-content-wrapper::-webkit-scrollbar{
+    width: 8px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track,
+.simplebar-content-wrapper::-webkit-scrollbar-track{
+    background: rgba(255,255,255,0.08);
+    border-radius: 20px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb,
+.simplebar-content-wrapper::-webkit-scrollbar-thumb{
+    background: linear-gradient(
+        180deg,
+        rgba(96,165,250,.9),
+        rgba(37,99,235,.9)
+    );
+
+    border-radius: 20px;
+
+    border: 2px solid transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover,
+.simplebar-content-wrapper::-webkit-scrollbar-thumb:hover{
+    background: linear-gradient(
+        180deg,
+        #93c5fd,
+        #3b82f6
+    );
+}
+
+/* ==========================================
+   SIMPLEBAR STYLE
+========================================== */
+
+.simplebar-track.simplebar-vertical{
+    width: 10px !important;
+    right: 3px !important;
+}
+
+.simplebar-track.simplebar-vertical .simplebar-scrollbar:before{
+    background: linear-gradient(
+        180deg,
+        #60a5fa,
+        #2563eb
+    ) !important;
+
+    border-radius: 20px !important;
+
+    opacity: .9 !important;
+}
+
+.simplebar-track.simplebar-vertical .simplebar-scrollbar:hover:before{
+    background: linear-gradient(
+        180deg,
+        #93c5fd,
+        #3b82f6
+    ) !important;
+}
+
+.simplebar-track.simplebar-vertical .simplebar-scrollbar.simplebar-visible:before{
+    opacity: 1 !important;
+}
+
+/* ==========================================
+   SMOOTH SCROLL
+========================================== */
+
+.sidebar-nav{
+    scroll-behavior: smooth;
+}
+
+/* ==========================================
+   HIDE HORIZONTAL SCROLL
+========================================== */
+
+.sidebar-nav,
+.simplebar-content-wrapper{
+    overflow-x: hidden !important;
+}
+
+
+/* ==========================================
+   HEADER PREMIUM BIRU DISKOMINFO
+========================================== */
+
+.app-header{
+    background: linear-gradient(
+        90deg,
+        #172554 0%,
+        #1e3a8a 50%,
+        #2563eb 100%
+    ) !important;
+
+    border-bottom: none !important;
+
+    box-shadow:
+        0 4px 20px rgba(0,0,0,.15) !important;
+}
+
+/* Judul halaman */
+
+.app-header h5{
+    color: #ffffff !important;
+    font-weight: 700;
+    letter-spacing: .3px;
+}
+
+/* ==========================================
+   NOTIFICATION BUTTON
+========================================== */
+
+#dropdownNotification{
+    width: 42px;
+    height: 42px;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 12px;
+
+    background: rgba(255,255,255,.12);
+
+    transition: .25s ease;
+}
+
+#dropdownNotification:hover{
+    background: rgba(255,255,255,.20);
+}
+
+#dropdownNotification iconify-icon{
+    color: #ffffff !important;
+    font-size: 22px;
+}
+
+/* Badge */
+
+#notification-count{
+    border: 2px solid #2563eb;
+}
+
+/* ==========================================
+   USER PROFILE
+========================================== */
+
+#dropdownUser{
+    padding: 6px 12px;
+
+    border-radius: 14px;
+
+    transition: .25s ease;
+}
+
+#dropdownUser:hover{
+    background: rgba(255,255,255,.12);
+}
+
+#dropdownUser h6{
+    color: #ffffff !important;
+}
+
+#dropdownUser small{
+    color: rgba(255,255,255,.75) !important;
+}
+
+#dropdownUser img{
+    border: 2px solid rgba(255,255,255,.35);
+}
+
+/* ==========================================
+   DROPDOWN
+========================================== */
+
+.dropdown-menu{
+    border: none !important;
+
+    border-radius: 16px !important;
+
+    box-shadow:
+        0 15px 35px rgba(0,0,0,.15);
+}
+
+.dropdown-item:hover{
+    background: #eff6ff;
+}
+
+/* ==========================================
+   MOBILE MENU
+========================================== */
+
+.sidebartoggler{
+    color: #ffffff !important;
+}
+
+.sidebartoggler i{
+    color: #ffffff !important;
+}
+
+/* ==========================================
+   ICON HEADER
+========================================== */
+
+.app-header .nav-link{
+    color: #ffffff !important;
+}
+
+
     </style>
     @stack('styles')
 </head>
@@ -213,16 +635,16 @@
                             </li>
                         @endcan
                         <form method="POST" action="{{ route('logout') }}" id="logout-form">
-                            @csrf
-                            <li class="sidebar-item mt-5 {{ request()->routeIs('users.index') ? 'selected' : '' }}">
-                                <a class="sidebar-link primary-hover-bg" aria-expanded="false"
-                                    onclick="document.getElementById('logout-form').submit(); return false;"
-                                    href="javascript:void(0);">
-                                    <iconify-icon icon="mdi:logout"></iconify-icon>
-                                    <span class="hide-menu">Logout</span>
-                                </a>
-                            </li>
-                        </form>
+    @csrf
+    <li class="sidebar-item mt-5">
+        <a class="sidebar-link primary-hover-bg"
+            href="javascript:void(0);"
+            onclick="openLogoutModal()">
+            <iconify-icon icon="mdi:logout"></iconify-icon>
+            <span class="hide-menu">Logout</span>
+        </a>
+    </li>
+</form>
                     </ul>
                 </nav>
                 <div class="sidebar-footer p-3 text-center"
@@ -237,7 +659,7 @@
 
         <div class="body-wrapper" style="margin-left: 270px; padding-top: 70px; min-height: 100vh;">
             <header class="app-header"
-                style="position: fixed; top: 0; left: 250px; right: 0; z-index: 999; background: #fff; height: 70px; border-bottom: 1px solid #dee2e6;">
+                style="position: fixed; top: 0; left: 250px; right: 0; z-index: 999; height: 70px;">
                 <nav class="navbar navbar-expand-lg navbar-light" style="margin: 0; padding: 0; height: 100%;">
                     <div class="d-block d-lg-flex align-items-center justify-content-between px-4 w-100"
                         style="height: 100%;">
@@ -249,47 +671,6 @@
                             <h5 class="mb-0 fw-semibold fs-4 d-none d-md-block">@yield('page-title')</h5>
                         </div>
                         <div class="d-flex align-items-center gap-3">
-                            <div class="dropdown">
-                                <a href="javascript:void(0)" class="nav-link position-relative"
-                                    id="dropdownNotification" data-bs-toggle="dropdown">
-                                    <iconify-icon icon="mdi:bell" class="fs-6"></iconify-icon>
-                                    <span
-                                        class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-                                        id="notification-count">3</span>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up py-0 overflow-hidden"
-                                    aria-labelledby="dropdownNotification">
-                                    <div class="p-3 border-bottom bg-primary-subtle">
-                                        <h6 class="mb-0">Notifikasi</h6>
-                                    </div>
-                                    <div class="p-3" style="max-height: 300px; overflow-y: auto;">
-                                        <div class="d-flex align-items-start gap-3 mb-3">
-                                            <div class="bg-primary-subtle rounded-circle p-2">
-                                                <iconify-icon icon="mdi:ticket"
-                                                    class="text-primary fs-5"></iconify-icon>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <p class="mb-1 text-dark small">Tiket TIX-202602-001 telah diselesaikan
-                                                </p>
-                                                <small class="text-muted">5 menit yang lalu</small>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex align-items-start gap-3 mb-3">
-                                            <div class="bg-warning-subtle rounded-circle p-2">
-                                                <iconify-icon icon="mdi:chat"
-                                                    class="text-warning fs-5"></iconify-icon>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                <p class="mb-1 text-dark small">Pesan baru di tiket TIX-202602-002</p>
-                                                <small class="text-muted">15 menit yang lalu</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <a href="#" class="dropdown-item text-center py-2 border-top">Lihat
-                                        Semua</a>
-                                </div>
-                            </div>
-
                             <div class="dropdown">
                                 <a href="javascript:void(0)" class="nav-link d-flex align-items-center gap-2"
                                     id="dropdownUser" data-bs-toggle="dropdown">
@@ -309,12 +690,12 @@
                                         <hr class="dropdown-divider">
                                     </li>
                                     <li>
-                                        <form method="POST" action="{{ route('logout') }}">
-                                            @csrf
-                                            <button type="submit" class="dropdown-item text-danger">
-                                                <iconify-icon icon="mdi:logout" class="me-2"></iconify-icon>Keluar
-                                            </button>
-                                        </form>
+                                        <button type="button"
+    class="dropdown-item text-danger"
+    onclick="openLogoutModal()">
+    <iconify-icon icon="mdi:logout" class="me-2"></iconify-icon>
+    Keluar
+</button>
                                     </li>
                                 </ul>
                             </div>
@@ -409,7 +790,116 @@
             setTimeout(replaceIconsWithFallback, 2000);
             setTimeout(replaceIconsWithFallback, 3000);
         });
+
+
+        function openLogoutModal() {
+    new bootstrap.Modal(
+        document.getElementById('logoutModal')
+    ).show();
+}
+
+function confirmLogout() {
+    document.getElementById('logout-form').submit();
+}
     </script>
+
+<!-- Logout Confirmation Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content logout-modal">
+
+            <div class="modal-body text-center p-5">
+
+                <div class="logout-icon mb-4">
+                    <iconify-icon icon="mdi:logout"></iconify-icon>
+                </div>
+
+                <h4 class="fw-bold text-dark mb-2">
+                    Konfirmasi Logout
+                </h4>
+
+                <p class="text-muted mb-4">
+                    Apakah Anda yakin ingin keluar dari sistem?
+                </p>
+
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button"
+                        class="btn btn-light px-4"
+                        data-bs-dismiss="modal">
+                        Batal
+                    </button>
+
+                    <button type="button"
+                        class="btn btn-primary px-4"
+                        onclick="confirmLogout()">
+                        Ya, Logout
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+.logout-modal{
+    border:none;
+    border-radius:24px;
+    overflow:hidden;
+
+    box-shadow:
+        0 25px 60px rgba(15,23,42,.25);
+}
+
+.logout-icon{
+    width:90px;
+    height:90px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:linear-gradient(
+        135deg,
+        #172554,
+        #1e3a8a,
+        #2563eb
+    );
+
+    box-shadow:
+        0 15px 35px rgba(37,99,235,.35);
+}
+
+.logout-icon iconify-icon{
+    color:white;
+    font-size:42px;
+}
+
+#logoutModal .btn-primary{
+    background:linear-gradient(
+        135deg,
+        #172554,
+        #2563eb
+    );
+
+    border:none;
+    border-radius:12px;
+}
+
+#logoutModal .btn-primary:hover{
+    transform:translateY(-1px);
+}
+
+#logoutModal .btn-light{
+    border-radius:12px;
+}
+</style>
+
     @stack('scripts')
     @vite(['resources/js/app.js'])
 </body>

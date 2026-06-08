@@ -7,6 +7,8 @@ use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketComment;
 use App\Models\User;
+use App\Notifications\TicketResolvedNotification;
+use App\Notifications\TicketStatusChangedNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -161,26 +163,32 @@ class TicketController extends Controller
 
     public function update(Request $request, int $id): RedirectResponse
     {
-        $ticket = Ticket::findOrFail($id);
+        $ticket = Ticket::with('user')->findOrFail($id);
+        $previousStatus = $ticket->status;
 
         $validated = $request->validate([
-            'assigned_to' => 'nullable|exists:users,id',
-            'status' => 'required|in:open,in_progress,resolved,closed',
+            'assigned_to' => 'sometimes|nullable|exists:users,id',
+            'status' => 'sometimes|required|in:open,in_progress,resolved,closed',
         ]);
 
         if ($request->filled('assigned_to') && $ticket->status === 'open') {
             $validated['status'] = 'in_progress';
         }
 
-        if ($validated['status'] === 'resolved' && ! $ticket->resolved_at) {
+        $newStatus = $validated['status'] ?? $ticket->status;
+
+        if ($newStatus === 'resolved' && ! $ticket->resolved_at) {
             $validated['resolved_at'] = now();
         }
 
-        if ($validated['status'] === 'closed' && ! $ticket->resolved_at) {
+        if ($newStatus === 'closed' && ! $ticket->resolved_at) {
             $validated['resolved_at'] = now();
         }
 
         $ticket->update($validated);
+        $ticket->refresh();
+
+        $this->notifyTicketStatusChangedIfNeeded($ticket, $previousStatus);
 
         return back()->with('success', 'Tiket berhasil diperbarui');
     }
@@ -263,22 +271,105 @@ class TicketController extends Controller
 
     public function bulkAssign(Request $request): RedirectResponse
     {
+        $this->normalizeTicketIds($request);
 
-        Ticket::where('id', $request->ticket_ids)->update([
-            'assigned_to' => $request->assigned_to,
-            'status' => 'in_progress',
+        $validated = $request->validate([
+            'ticket_ids' => 'required|array',
+            'ticket_ids.*' => 'exists:tickets,id',
+            'assigned_to' => 'required|string|max:255',
         ]);
+
+        $tickets = Ticket::with('user')
+            ->whereIn('id', $validated['ticket_ids'])
+            ->get();
+
+        foreach ($tickets as $ticket) {
+            $previousStatus = $ticket->status;
+
+            $ticket->update([
+                'assigned_to' => $validated['assigned_to'],
+                'status' => 'in_progress',
+            ]);
+
+            $ticket->refresh();
+
+            $this->notifyTicketStatusChangedIfNeeded($ticket, $previousStatus);
+        }
 
         return back()->with('success', 'Teknisi berhasil ditugaskan');
     }
 
     public function bulkStatus(Request $request): RedirectResponse
     {
-        Ticket::where('id', $request->ticket_ids)->update([
-            'assigned_to' => $request->assigned_to,
-            'status' => $request->status,
+        $this->normalizeTicketIds($request);
+
+        $validated = $request->validate([
+            'ticket_ids' => 'required|array',
+            'ticket_ids.*' => 'exists:tickets,id',
+            'assigned_to' => 'nullable|exists:users,id',
+            'status' => 'required|in:open,in_progress,resolved,closed',
         ]);
 
+        $tickets = Ticket::with('user')
+            ->whereIn('id', $validated['ticket_ids'])
+            ->get();
+
+        foreach ($tickets as $ticket) {
+            $previousStatus = $ticket->status;
+            $updates = [
+                'assigned_to' => $validated['assigned_to'] ?? null,
+                'status' => $validated['status'],
+            ];
+
+            if (in_array($validated['status'], ['resolved', 'closed'], true) && ! $ticket->resolved_at) {
+                $updates['resolved_at'] = now();
+            }
+
+            $ticket->update($updates);
+            $ticket->refresh();
+
+            $this->notifyTicketStatusChangedIfNeeded($ticket, $previousStatus);
+        }
+
         return back()->with('success', 'Status tiket berhasil diperbarui');
+    }
+
+    private function normalizeTicketIds(Request $request): void
+    {
+        if (! is_string($request->input('ticket_ids'))) {
+            return;
+        }
+
+        $ticketIds = collect(explode(',', $request->input('ticket_ids')))
+            ->map(fn (string $ticketId): string => trim($ticketId))
+            ->filter()
+            ->values()
+            ->all();
+
+        $request->merge(['ticket_ids' => $ticketIds]);
+    }
+
+    private function notifyTicketStatusChangedIfNeeded(Ticket $ticket, string $previousStatus): void
+    {
+        if ($previousStatus === $ticket->status || ! in_array($ticket->status, ['in_progress', 'resolved', 'closed'], true)) {
+            return;
+        }
+
+        $ticket->loadMissing('user');
+        $user = $ticket->user;
+
+        if (! $user?->isPegawaiDinas() || blank($user->email)) {
+            return;
+        }
+
+        try {
+            $notification = $ticket->status === 'resolved'
+                ? new TicketResolvedNotification($ticket)
+                : new TicketStatusChangedNotification($ticket, $ticket->status);
+
+            $user->notify($notification);
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
     }
 }

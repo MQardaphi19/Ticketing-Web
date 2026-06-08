@@ -27,7 +27,7 @@ class CategorySeeder extends Seeder
                 'sla_hours' => 24,
             ],
             [
-                'name' => 'Infrastuktur IT',
+                'name' => 'Infrastruktur IT',
                 'slug' => 'infrastruktur-it',
                 'description' => 'Permasalahan terkait jaringan, server, perangkat keras, dan infrastruktur teknologi informasi lainnya.',
                 'sla_hours' => 8,

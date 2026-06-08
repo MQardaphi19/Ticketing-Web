@@ -21,7 +21,7 @@
             <div class="border rounded-3 p-3 bg-primary-subtle">
               <div class="d-flex align-items-center gap-3">
                 <div class="bg-white rounded-circle p-2">
-                  <iconify-icon icon="solar:chat-linear" class="text-primary fs-4"></iconify-icon>
+                  <iconify-icon icon="solar:database-linear" class="text-primary fs-4"></iconify-icon>
                 </div>
                 <div>
                   <h6 class="mb-0 fw-bold">{{ $totalQueries }}</h6>
@@ -177,14 +177,14 @@
 </div>
 
 <div class="row mt-4">
-  <div class="col-lg-6">
+  {{-- <div class="col-lg-6">
     <div class="card shadow-sm border-0">
       <div class="card-body p-4">
-        <h5 class="mb-3 fw-semibold">Distribusi Akurasi per Kategori</h5>
+        <h5 class="mb-3 fw-semibold">Distribusiii Akurasi per Kategori</h5>
         <div id="accuracyChart"></div>
       </div>
     </div>
-  </div>
+  </div> --}}
 
   <div class="col-lg-6">
     <div class="card shadow-sm border-0">
@@ -195,10 +195,85 @@
     </div>
   </div>
 </div>
+
+<!-- Modal Validasi Log Chatbot -->
+<div class="modal fade" id="validateLogModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 overflow-hidden shadow-lg">
+
+            <div class="modal-header border-0 text-white"
+                style="background:linear-gradient(135deg,#0f172a,#1e3a8a);">
+                <h5 class="modal-title fw-semibold text-white">
+                    <iconify-icon icon="solar:shield-check-linear" class="me-2"></iconify-icon>
+                    Validasi Prediksi Chatbot
+                </h5>
+
+                <button type="button"
+                    class="btn-close btn-close-white"
+                    data-bs-dismiss="modal">
+                </button>
+            </div>
+
+            <div class="modal-body text-center p-5">
+
+                <div class="mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle"
+                        style="
+                            width:90px;
+                            height:90px;
+                            background:linear-gradient(135deg,#1e3a8a,#2563eb);
+                            box-shadow:0 15px 30px rgba(37,99,235,.25);
+                        ">
+                        <iconify-icon
+                            icon="solar:shield-check-bold"
+                            class="text-white"
+                            style="font-size:45px;">
+                        </iconify-icon>
+                    </div>
+                </div>
+
+                <h4 class="fw-bold text-dark mb-2">
+                    Konfirmasi Validasi
+                </h4>
+
+                <p class="text-muted mb-0">
+                    Apakah hasil prediksi chatbot ini
+                    <span id="validationText" class="fw-semibold text-primary"></span>?
+                </p>
+
+            </div>
+
+            <div class="modal-footer border-0 justify-content-center pb-4">
+
+                <button type="button"
+                    class="btn btn-light px-4"
+                    data-bs-dismiss="modal">
+                    Batal
+                </button>
+
+                <button type="button"
+                    class="btn text-white px-4"
+                    id="confirmValidationBtn"
+                    style="
+                        background:linear-gradient(135deg,#1e3a8a,#2563eb);
+                        border:none;
+                    ">
+                    <iconify-icon icon="solar:check-circle-linear" class="me-1"></iconify-icon>
+                    Ya, Validasi
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @push('scripts')
 <script>
+  let selectedLogId = null;
+  let selectedValidationStatus = null;
   var accuracyChartOptions = {
     series: [85, 78, 92, 88, 75, 90],
     chart: { type: 'bar', height: 300, toolbar: { show: false } },
@@ -226,17 +301,72 @@
   confidenceChart.render();
 
   function validateLog(id, isCorrect) {
-    fetch('/admin/chatbot/validate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
-      body: JSON.stringify({ log_id: id, is_correct: isCorrect })
+
+    selectedLogId = id;
+    selectedValidationStatus = isCorrect;
+
+    document.getElementById('validationText').innerHTML =
+        isCorrect
+            ? '<span class="text-success">BENAR</span>'
+            : '<span class="text-danger">SALAH</span>';
+
+    document.getElementById('confirmValidationBtn').onclick =
+        confirmValidation;
+
+    new bootstrap.Modal(
+        document.getElementById('validateLogModal')
+    ).show();
+}
+
+function confirmValidation() {
+
+    const btn = document.getElementById(
+        'confirmValidationBtn'
+    );
+
+    btn.disabled = true;
+
+    btn.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2"></span>
+        Memproses...
+    `;
+
+    fetch('{{ route('chatbot.validate') }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector(
+                'meta[name="csrf-token"]'
+            ).content
+        },
+        body: JSON.stringify({
+            log_id: selectedLogId,
+            is_correct: selectedValidationStatus
+        })
     })
     .then(response => response.json())
     .then(data => {
-      alert(data.message);
-      location.reload();
+
+        bootstrap.Modal.getInstance(
+            document.getElementById('validateLogModal')
+        ).hide();
+
+        location.reload();
     })
-    .catch(error => alert('Terjadi kesalahan saat validasi.'));
-  }
+    .catch(error => {
+
+        alert('Terjadi kesalahan saat validasi.');
+
+        btn.disabled = false;
+
+        btn.innerHTML = `
+            <iconify-icon
+                icon="solar:check-circle-linear"
+                class="me-1">
+            </iconify-icon>
+            Ya, Validasi
+        `;
+    });
+}
 </script>
 @endpush
