@@ -21,7 +21,7 @@ Route::middleware(['auth'])->group(function () {
         return "Test";
     });
 
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->middleware('permission:view dashboard')->name('dashboard');
 
     // Dashboard
 
@@ -40,38 +40,45 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/bulk/status', [TicketController::class, 'bulkStatus'])->name('bulk.status');
     });
 
-    Route::prefix('categories')->name('categories.')->group(function () {
+    Route::middleware('permission:view kategori')->prefix('categories')->name('categories.')->group(function () {
         Route::get('/', [CategoryController::class, 'index'])->name('index');
-        Route::post('/', [CategoryController::class, 'store'])->name('store');
-        Route::put('/{category}', [CategoryController::class, 'update'])->name('update');
-        Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
+        Route::post('/', [CategoryController::class, 'store'])->middleware('permission:create kategori')->name('store');
+        Route::put('/{category}', [CategoryController::class, 'update'])->middleware('permission:edit kategori')->name('update');
+        Route::delete('/{category}', [CategoryController::class, 'destroy'])->middleware('permission:delete kategori')->name('destroy');
     });
 
     // Knowledge Base Controller
-    Route::prefix('knowledge')->name('knowledge.')->group(function () {
+    Route::middleware('permission:view knowledge base')->prefix('knowledge')->name('knowledge.')->group(function () {
         Route::get('/', [KnowledgeBaseController::class, 'index'])->name('index');
-        Route::post('/', [KnowledgeBaseController::class, 'store'])->name('store');
-        Route::put('/{knowledge}', [KnowledgeBaseController::class, 'update'])->name('update');
-        Route::delete('/{knowledge}', [KnowledgeBaseController::class, 'destroy'])->name('destroy');
+        Route::post('/', [KnowledgeBaseController::class, 'store'])->middleware('permission:create knowledge base')->name('store');
+        Route::put('/{knowledge}', [KnowledgeBaseController::class, 'update'])->middleware('permission:edit knowledge base')->name('update');
+        Route::delete('/{knowledge}', [KnowledgeBaseController::class, 'destroy'])->middleware('permission:delete knowledge base')->name('destroy');
     });
 
     // Chatbot AI Routes
-    Route::prefix('chatbot')->name('chatbot.')->group(function () {
+    // Predict endpoint - accessible to all authenticated users
+    Route::post('/chatbot/predict', [ChatbotController::class, 'predict'])->name('chatbot.predict');
+
+    // Logs and validation - only for admin
+    Route::middleware('permission:view log chatbot')->prefix('chatbot')->name('chatbot.')->group(function () {
         Route::get('/logs', [ChatbotController::class, 'logs'])->name('logs');
-        Route::post('/predict', [ChatbotController::class, 'predict'])->name('predict');
-        Route::post('/validate', [ChatbotController::class, 'validatePrediction'])->name('validate');
+        Route::post('/validate', [ChatbotController::class, 'validatePrediction'])->middleware('permission:validate log chatbot')->name('validate');
     });
 
     // Admin AI Training Routes
-    Route::post('/export-dataset', [KnowledgeBaseController::class, 'exportDataset'])->name('knowledge.export-dataset');
-    Route::post('/train-model', [KnowledgeBaseController::class, 'trainModel'])->name('knowledge.train-model');
+    Route::post('/export-dataset', [KnowledgeBaseController::class, 'exportDataset'])
+        ->middleware('permission:train')
+        ->name('knowledge.export-dataset');
+    Route::post('/train-model', [KnowledgeBaseController::class, 'trainModel'])
+        ->middleware('permission:train')
+        ->name('knowledge.train-model');
 
-    Route::prefix('users')->name('users.')->group(function () {
+    Route::middleware('permission:view pengguna')->prefix('users')->name('users.')->group(function () {
         Route::get('/', [UserController::class, 'index'])->name('index');
-        Route::post('/', [UserController::class, 'store'])->name('store');
-        Route::put('/{user}/password', [UserController::class, 'resetPassword'])->name('password.reset');
-        Route::put('/{user}', [UserController::class, 'update'])->name('update');
-        Route::delete('/{user}', [UserController::class, 'destroy'])->name('destroy');
+        Route::post('/', [UserController::class, 'store'])->middleware('permission:create pengguna')->name('store');
+        Route::put('/{user}/password', [UserController::class, 'resetPassword'])->middleware('permission:edit pengguna')->name('password.reset');
+        Route::put('/{user}', [UserController::class, 'update'])->middleware('permission:edit pengguna')->name('update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->middleware('permission:delete pengguna')->name('destroy');
     });
 
     // Custom routes
@@ -96,8 +103,8 @@ Route::middleware(['auth'])->group(function () {
     // Route::delete('/comments/{comment}', [TicketCommentController::class, 'destroy'])
     //     ->name('comments.destroy');
 
-    // Role and Permission Management
-    Route::middleware(['auth'])->group(function () {
+    // Role and Permission Management - Only Admin
+    Route::middleware('permission:view role permission')->group(function () {
         Route::get('/roles', [RolePermissionController::class, 'index'])->name('roles.index');
         Route::post('/roles/{role}', [RolePermissionController::class, 'update'])->name('roles.update');
     });

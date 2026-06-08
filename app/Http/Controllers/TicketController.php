@@ -20,6 +20,13 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class TicketController extends Controller
 {
+    public function __construct()
+    {
+        // Add permission requirement for ticket creation
+        $this->middleware('permission:create tickets')->only(['create', 'store']);
+        $this->middleware('permission:view my tickets')->only(['my']);
+    }
+
     public function my(): View
     {
         $tickets = Ticket::with(['user', 'category', 'assignedTechnician'])
@@ -40,8 +47,17 @@ class TicketController extends Controller
 
     public function index(Request $request): View
     {
+        $user = Auth::user();
+
+        // Filter berdasarkan permission/role
         $query = Ticket::with(['user', 'category', 'assignedTechnician'])
             ->withCount('attachments');
+
+        // Only show own tickets if user doesn't have permission to view all tickets
+        if (!$user->hasPermissionTo('view tickets')) {
+            abort_if(!$user->hasPermissionTo('view my tickets'), 403);
+            $query->where('user_id', $user->id);
+        }
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -66,6 +82,17 @@ class TicketController extends Controller
     {
         $ticket = Ticket::with(['user', 'category', 'assignedTechnician', 'attachments.user', 'messages.user'])
             ->findOrFail($id);
+
+        // Authorization check - user can view if:
+        // 1. They own the ticket
+        // 2. They are assigned to the ticket
+        // 3. They have 'view tickets' permission (staff/admin)
+        $user = Auth::user();
+        $canView = $ticket->user_id === $user->id
+            || (string) $ticket->assigned_to === (string) $user->id
+            || $user->hasPermissionTo('view tickets');
+
+        abort_unless($canView, 403);
 
         $technicians = User::where('role', 'teknisi')->get();
 

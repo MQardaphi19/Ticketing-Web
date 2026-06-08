@@ -13,6 +13,16 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class KnowledgeBaseController extends Controller
 {
+    public function __construct()
+    {
+        // Second layer of authorization - middleware already checked in routes
+        $this->middleware('permission:view knowledge base')->only(['index']);
+        $this->middleware('permission:create knowledge base')->only(['store']);
+        $this->middleware('permission:edit knowledge base')->only(['update']);
+        $this->middleware('permission:delete knowledge base')->only(['destroy']);
+        $this->middleware('permission:train')->only(['exportDataset', 'trainModel']);
+    }
+
     public function index(): \Illuminate\View\View
     {
         $totalData = KnowledgeBase::count();

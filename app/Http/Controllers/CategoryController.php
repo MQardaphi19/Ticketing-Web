@@ -8,6 +8,16 @@ use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
+    public function __construct()
+    {
+        // Second layer of authorization - middleware already checked in routes
+        // This is redundant protection in case route protection is bypassed
+        $this->middleware('permission:view kategori')->only(['index']);
+        $this->middleware('permission:create kategori')->only(['store']);
+        $this->middleware('permission:edit kategori')->only(['update']);
+        $this->middleware('permission:delete kategori')->only(['destroy']);
+    }
+
     public function index(): \Illuminate\View\View
     {
         $categories = Category::all();

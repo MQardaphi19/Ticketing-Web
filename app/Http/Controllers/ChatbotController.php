@@ -17,6 +17,10 @@ class ChatbotController extends Controller
 
     public function __construct()
     {
+        // Second layer of authorization - middleware already checked in routes
+        $this->middleware('permission:view log chatbot')->only(['logs']);
+        $this->middleware('permission:validate log chatbot')->only(['validatePrediction']);
+
         $baseUrl = config('services.chatbot.api_url', 'http://localhost:8001');
         $this->apiUrl = rtrim($baseUrl, '/');
 

@@ -8,6 +8,12 @@ use Spatie\Permission\Models\Permission;
 
 class RolePermissionController extends Controller
 {
+    public function __construct()
+    {
+        // Second layer of authorization - middleware already checked in routes
+        $this->middleware('permission:view role permission');
+    }
+
     public function index()
     {
         $roles = Role::with('permissions')->get();

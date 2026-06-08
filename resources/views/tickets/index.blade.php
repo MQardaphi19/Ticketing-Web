@@ -645,7 +645,7 @@
     <div class="modal-header border-0 text-white"
          style="background:linear-gradient(135deg,#0f172a,#1e3a8a);">
 
-        <h5 class="modal-title fw-bold">
+        <h5 class="modal-title fw-bold text-white">
             <iconify-icon icon="solar:pen-linear" class="me-2"></iconify-icon>
             Ubah Status Tiket
         </h5>

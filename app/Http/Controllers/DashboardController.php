@@ -9,6 +9,12 @@ use App\Models\Ticket;
 
 class DashboardController extends Controller
 {
+    public function __construct()
+    {
+        // Ensure user has permission to view dashboard
+        $this->middleware('permission:view dashboard');
+    }
+
     public function index(): \Illuminate\View\View
     {
         if (auth()->user()->role === "pegawai-dinas") {
