@@ -144,6 +144,19 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="mt-3" id="chatbotError" style="display: none;">
+                        <div class="alert alert-danger">
+                            <div class="d-flex align-items-start gap-2">
+                                <iconify-icon icon="solar:warning-circle-linear" class="fs-5"></iconify-icon>
+                                <div>
+                                    <strong>Prediksi Gagal</strong>
+                                    <p class="mb-0" id="errorMessage">-</p>
+                                    <small class="text-muted">Confidence: <span id="errorConfidenceScore">-</span>% (di bawah 20%)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -157,11 +170,15 @@
                         </li>
                         <li class="mb-2 d-flex gap-2">
                             <iconify-icon icon="solar:check-circle-linear" class="text-success"></iconify-icon>
-                            <span>Sertakan pesan error jika ada</span>
+                            <span>Sertakan deskripsi yang lengkap dan detail</span>
                         </li>
                         <li class="mb-2 d-flex gap-2">
                             <iconify-icon icon="solar:check-circle-linear" class="text-success"></iconify-icon>
-                            <span>Lampirkan screenshot jika perlu</span>
+                            <span>Lampirkan file dan foto jika perlu untuk mendukung laporan</span>
+                        </li>
+                        <li class="mb-2 d-flex gap-2">
+                            <iconify-icon icon="solar:check-circle-linear" class="text-success"></iconify-icon>
+                            <span>Jangan kirim pesan yang tidak relevan</span>
                         </li>
                         <li class="mb-2 d-flex gap-2">
                             <iconify-icon icon="solar:check-circle-linear" class="text-success"></iconify-icon>
@@ -296,17 +313,34 @@
                 .then(data => {
                     console.log('AI Response:', data);
 
-                    if (!data.success) {
-                        addBotMessage('Maaf, layanan AI tidak tersedia. Silakan pilih kategori secara manual.');
+                    const predictionDiv = document.getElementById('chatbotPrediction');
+                    const errorDiv = document.getElementById('chatbotError');
+
+                    if (data.low_confidence) {
+                        addBotMessage(data.message);
+
+                        predictionDiv.style.display = 'none';
+                        errorDiv.style.display = 'block';
+
+                        document.getElementById('errorMessage').textContent = data.message;
+                        document.getElementById('errorConfidenceScore').textContent = data.confidence_score;
+
                         return;
                     }
+
+                    if (!data.success) {
+                        addBotMessage('Maaf, layanan AI tidak tersedia. Silakan pilih kategori secara manual.');
+                        errorDiv.style.display = 'none';
+                        return;
+                    }
+
+                    errorDiv.style.display = 'none';
 
                     addBotMessage(`
     Berdasarkan deskripsi Anda, saya merekomendasikan kategori:
     <strong>${data.category_name}</strong>
   `);
 
-                    const predictionDiv = document.getElementById('chatbotPrediction');
                     predictionDiv.style.display = 'block';
 
                     document.getElementById('predictedCategory').textContent =

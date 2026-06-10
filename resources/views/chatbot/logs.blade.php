@@ -114,15 +114,18 @@
                 </td>
                 <td>
                   <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2">
-                    {{ $log->predictedCategory->name }}
+                    {{ $log->predictedCategory->name ?? "Nilai Confidence Sangat Rendah" }}
                   </span>
                 </td>
                 <td>
                   <div class="progress" style="height: 20px; width: 100px;">
-                    <div class="progress-bar @if($log->confidence_score >= 80) bg-success @elseif($log->confidence_score >= 60) bg-warning @else bg-danger @endif" role="progressbar" style="width: {{ $log->confidence_score }}%">
+                    <div class="progress-bar @if($log->confidence_score >= 80) bg-success @elseif($log->confidence_score >= 60) bg-warning @elseif($log->confidence_score >= 20) bg-danger @else bg-dark @endif" role="progressbar" style="width: {{ $log->confidence_score }}%">
                       {{ $log->confidence_score }}%
                     </div>
                   </div>
+                  @if($log->confidence_score < 20)
+                    
+                  @endif
                 </td>
                 <td>
                   @if($log->is_correct === true)
@@ -290,10 +293,10 @@
   accuracyChart.render();
 
   var confidenceChartOptions = {
-    series: [45, 30, 15, 10],
+    series: [45, 30, 15, 5, 5],
     chart: { type: 'donut', height: 300 },
-    labels: ['80-100%', '60-80%', '40-60%', '0-40%'],
-    colors: ['#22c55e', '#f59e0b', '#ef4444', '#6c757d'],
+    labels: ['80-100%', '60-80%', '20-60%', '0-20%', 'Gagal (<20%)'],
+    colors: ['#22c55e', '#f59e0b', '#ef4444', '#6c757d', '#1f2937'],
     legend: { position: 'bottom' },
     plotOptions: { pie: { donut: { size: '70%' } } }
   };

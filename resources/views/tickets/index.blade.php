@@ -1,3 +1,4 @@
+
 @extends('layouts.app')
 
 @section('title', 'Semua Tiket - Sistem Tiket Layanan Kominfo')

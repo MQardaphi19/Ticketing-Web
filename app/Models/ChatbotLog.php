@@ -16,7 +16,7 @@ class ChatbotLog extends Model
     ];
 
     protected $casts = [
-        'confidence_score' => 'integer',
+        'confidence_score' => 'float',
         'is_correct' => 'boolean',
     ];
 

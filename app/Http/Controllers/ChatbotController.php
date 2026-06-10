@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 class ChatbotController extends Controller
 {
     protected $apiUrl;
+    const MIN_CONFIDENCE = 20;
 
     public function __construct()
     {
@@ -69,6 +70,24 @@ class ChatbotController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
+                $confidence = $data['confidence_score'] ?? 0;
+
+                if ($confidence < self::MIN_CONFIDENCE) {
+                    ChatbotLog::create([
+                        'user_id' => auth()->id(),
+                        'user_query' => $query,
+                        'predicted_category_id' => null,
+                        'confidence_score' => $confidence,
+                        'is_correct' => false,
+                    ]);
+
+                    return response()->json([
+                        'success' => false,
+                        'low_confidence' => true,
+                        'confidence_score' => $confidence,
+                        'message' => 'Maaf, sistem tidak dapat menentukan kategori dengan yakin. Silakan coba kembali dengan deskripsi yang lebih jelas dan detail.',
+                    ]);
+                }
 
                 $category = $this->resolvePredictedCategory($data, $query);
 
