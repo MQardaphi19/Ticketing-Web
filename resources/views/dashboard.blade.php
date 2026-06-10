@@ -690,7 +690,7 @@
                     height: 350
                 },
                 labels: @json($categoryLabels),
-                colors: ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'],
+                colors: ['#2f32fa', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6'],
                 legend: {
                     position: 'bottom'
                 },
