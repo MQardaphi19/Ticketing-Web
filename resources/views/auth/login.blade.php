@@ -315,7 +315,7 @@ body::after{
       </h1>
 
       <p class="login-subtitle">
-        Layanan Diskominfo
+        Layanan Diskominfo OKU
       </p>
 
     </div>
