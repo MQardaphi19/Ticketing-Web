@@ -9,13 +9,19 @@ use App\Models\ChatbotLog;
 use App\Models\Category;
 use Illuminate\View\View;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 
 class ChatbotController extends Controller
 {
     protected $apiUrl;
+    const MIN_CONFIDENCE = 20;
 
     public function __construct()
     {
+        // Second layer of authorization - middleware already checked in routes
+        $this->middleware('permission:view log chatbot')->only(['logs']);
+        $this->middleware('permission:validate log chatbot')->only(['validatePrediction']);
+
         $baseUrl = config('services.chatbot.api_url', 'http://localhost:8001');
         $this->apiUrl = rtrim($baseUrl, '/');
 
@@ -64,31 +70,38 @@ class ChatbotController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
+                $confidence = $data['confidence_score'] ?? 0;
 
-                // Log prediction for accuracy tracking
-                $categoryId = $data['category_id'] ?? null;
+                if ($confidence < self::MIN_CONFIDENCE) {
+                    ChatbotLog::create([
+                        'user_id' => auth()->id(),
+                        'user_query' => $query,
+                        'predicted_category_id' => null,
+                        'confidence_score' => $confidence,
+                        'is_correct' => false,
+                    ]);
 
-                // cek apakah category benar-benar ada
-                $categoryExists = Category::where('id', $categoryId)->exists();
-
-                // fallback ke kategori "lainnya"
-                if (!$categoryExists) {
-                    $fallbackCategory = Category::where('name', 'lainnya')->first();
-
-                    $categoryId = $fallbackCategory ? $fallbackCategory->id : null;
+                    return response()->json([
+                        'success' => false,
+                        'low_confidence' => true,
+                        'confidence_score' => $confidence,
+                        'message' => 'Maaf, sistem tidak dapat menentukan kategori dengan yakin. Silakan coba kembali dengan deskripsi yang lebih jelas dan detail.',
+                    ]);
                 }
+
+                $category = $this->resolvePredictedCategory($data, $query);
 
                 ChatbotLog::create([
                     'user_id' => auth()->id(),
                     'user_query' => $query,
-                    'predicted_category_id' => $categoryId,
+                    'predicted_category_id' => $category?->id,
                     'confidence_score' => $data['confidence_score']
                 ]);
 
                 return response()->json([
                     'success' => true,
-                    'category_id' => $data['category_id'],
-                    'category_name' => $data['category_name'],
+                    'category_id' => $category?->id,
+                    'category_name' => $category?->name ?? $data['category_name'],
                     'confidence_score' => $data['confidence_score']
                 ]);
             } else {
@@ -127,5 +140,52 @@ class ChatbotController extends Controller
         $log->update(['is_correct' => $validated['is_correct']]);
 
         return response()->json(['message' => 'Validasi berhasil disimpan']);
+    }
+
+    private function resolvePredictedCategory(array $data, ?string $query = null): ?Category
+    {
+        if ($query) {
+            $querySlug = Str::slug($query);
+
+            $category = Category::all()->first(function (Category $category) use ($querySlug) {
+                return Str::contains($querySlug, $category->slug);
+            });
+
+            if ($category) {
+                return $category;
+            }
+        }
+
+        $predictedName = $data['category_name'] ?? null;
+
+        if ($predictedName) {
+            $slug = Str::slug($predictedName);
+
+            $category = Category::where('slug', $slug)
+                ->orWhereRaw('LOWER(name) = ?', [Str::lower($predictedName)])
+                ->first();
+
+            if ($category) {
+                return $category;
+            }
+
+            $category = Category::all()->first(function (Category $category) use ($slug) {
+                return Str::contains($slug, $category->slug);
+            });
+
+            if ($category) {
+                return $category;
+            }
+        }
+
+        $apiCategoryId = $data['category_id'] ?? null;
+
+        if ($apiCategoryId && $category = Category::find($apiCategoryId)) {
+            return $category;
+        }
+
+        return Category::where('slug', 'lainnya')
+            ->orWhereRaw('LOWER(name) = ?', ['lainnya'])
+            ->first();
     }
 }

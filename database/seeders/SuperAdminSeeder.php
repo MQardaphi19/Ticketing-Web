@@ -15,17 +15,34 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::firstOrCreate(
-            ['email' => 'superadmin@example.com'],
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@diskominfo.go.id'],
             [
-                'name' => 'Super Admin',
-                'password' => 'SuperAdmin123!',
+                'name' => 'Admin',
+                'password' => 'passwordadmin',
                 'nip' => '0000000000',
                 'department' => 'Administrasi',
                 'phone' => '081234567890',
-                'role' => 'super-admin',
+                'role' => 'admin',
                 'status' => 'active',
             ]
         );
+        $admin->assignRole('admin');
+
+        $kepala = User::firstOrCreate(
+            ['email' => 'kepala@diskominfo.go.id'],
+            [
+                'name' => 'Kepala',
+                'password' => 'passwordkepala',
+                'nip' => '1111111111',
+                'department' => 'Kepala Dinas',
+                'phone' => '081234567890',
+                'role' => 'kepala-diskominfo',
+                'status' => 'active',
+            ]
+        );
+        $kepala->assignRole('kepala-diskominfo');
+
+        
     }
 }

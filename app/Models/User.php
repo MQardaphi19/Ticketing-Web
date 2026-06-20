@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles;
 
     protected $fillable = [
         'name',
@@ -46,6 +47,16 @@ class User extends Authenticatable
         return $this->role === 'super-admin';
     }
 
+    public function isKepalaDiskominfo(): bool
+    {
+        return $this->role === 'kepala-diskominfo';
+    }
+
+    public function isPegawaiDinas(): bool
+    {
+        return $this->role === 'pegawai-dinas';
+    }
+
     public function isStaff(): bool
     {
         return $this->role === 'teknisi';
@@ -73,7 +84,7 @@ class User extends Authenticatable
 
     public function ticketMessages(): HasMany
     {
-        return $this->hasMany(TicketMessage::class);
+        return $this->hasMany(TicketComment::class);
     }
 
     public function chatbotLogs(): HasMany

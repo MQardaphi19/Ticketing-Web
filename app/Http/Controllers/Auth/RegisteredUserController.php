@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -33,19 +34,37 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'nip' => ['required', 'string', 'max:255', 'unique:'.User::class],
+            'department' => ['required', 'string', Rule::in([
+                'Dinas Pendidikan',
+                'Dinas Kesehatan',
+                'Dinas BKPSDM',
+                'Dinas Sosial',
+                'Dinas Dukcapil',
+                'Inspektorat',
+                'Dinas Perizinan',
+                'Dinas Kecamatan',
+                'Dinas Bappelitbangda',
+                
+            ])],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'phone' => ['required', 'string', 'max:255'],
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'nip' => $request->nip,
+            'department' => $request->department,
             'password' => Hash::make($request->password),
+            'role' => 'pegawai-dinas',
+            'phone' => $request->phone,
         ]);
+
+        $user->assignRole('pegawai-dinas');
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('login', absolute: false));
     }
 }

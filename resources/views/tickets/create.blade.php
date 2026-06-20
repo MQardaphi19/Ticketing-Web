@@ -11,7 +11,7 @@
                 <div class="card-body p-4">
                     <h5 class="mb-4 fw-semibold">Formulir Permohonan</h5>
 
-                    <form method="POST" action="{{ route('tickets.store') }}" id="ticketForm">
+                    <form method="POST" action="{{ route('tickets.store') }}" id="ticketForm" enctype="multipart/form-data">
                         @csrf
 
                         <div class="mb-3">
@@ -65,6 +65,12 @@
                                 accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
                             <div class="form-text">Maksimal 5 file, ukuran masing-masing maksimal 5MB. Format: JPG, PNG,
                                 PDF, DOC, DOCX</div>
+                            @error('attachments')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                            @error('attachments.*')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
                             <div id="attachmentPreview" class="mt-2"></div>
                         </div>
 
@@ -138,6 +144,19 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="mt-3" id="chatbotError" style="display: none;">
+                        <div class="alert alert-danger">
+                            <div class="d-flex align-items-start gap-2">
+                                <iconify-icon icon="solar:warning-circle-linear" class="fs-5"></iconify-icon>
+                                <div>
+                                    <strong>Prediksi Gagal</strong>
+                                    <p class="mb-0" id="errorMessage">-</p>
+                                    <small class="text-muted">Confidence: <span id="errorConfidenceScore">-</span>% (di bawah 20%)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -151,11 +170,15 @@
                         </li>
                         <li class="mb-2 d-flex gap-2">
                             <iconify-icon icon="solar:check-circle-linear" class="text-success"></iconify-icon>
-                            <span>Sertakan pesan error jika ada</span>
+                            <span>Sertakan deskripsi yang lengkap dan detail</span>
                         </li>
                         <li class="mb-2 d-flex gap-2">
                             <iconify-icon icon="solar:check-circle-linear" class="text-success"></iconify-icon>
-                            <span>Lampirkan screenshot jika perlu</span>
+                            <span>Lampirkan file dan foto jika perlu untuk mendukung laporan</span>
+                        </li>
+                        <li class="mb-2 d-flex gap-2">
+                            <iconify-icon icon="solar:check-circle-linear" class="text-success"></iconify-icon>
+                            <span>Jangan kirim pesan yang tidak relevan</span>
                         </li>
                         <li class="mb-2 d-flex gap-2">
                             <iconify-icon icon="solar:check-circle-linear" class="text-success"></iconify-icon>
@@ -184,10 +207,33 @@
         document.getElementById('attachments').addEventListener('change', function(e) {
             const files = e.target.files;
             const preview = document.getElementById('attachmentPreview');
+            const allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'];
+            const maxFiles = 5;
+            const maxSize = 5 * 1024 * 1024;
             preview.innerHTML = '';
+
+            if (files.length > maxFiles) {
+                preview.innerHTML = '<div class="alert alert-danger py-2 mb-0">Maksimal 5 file yang dapat diunggah.</div>';
+                e.target.value = '';
+                return;
+            }
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
+                const extension = file.name.split('.').pop().toLowerCase();
+
+                if (!allowedExtensions.includes(extension)) {
+                    preview.innerHTML = '<div class="alert alert-danger py-2 mb-0">Format file tidak didukung. Gunakan JPG, PNG, PDF, DOC, atau DOCX.</div>';
+                    e.target.value = '';
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    preview.innerHTML = '<div class="alert alert-danger py-2 mb-0">Ukuran tiap file maksimal 5MB.</div>';
+                    e.target.value = '';
+                    return;
+                }
+
                 const fileSize = (file.size / 1024).toFixed(2);
                 preview.innerHTML += `
         <div class="d-flex align-items-center gap-2 mb-2 p-2 bg-light rounded">
@@ -196,9 +242,6 @@
             <small class="fw-medium">${file.name}</small>
             <small class="text-muted d-block">${fileSize} KB</small>
           </div>
-          <button type="button" class="btn btn-sm btn-link text-danger p-0" onclick="this.parentElement.remove()">
-            <iconify-icon icon="solar:trash-bin-linear"></iconify-icon>
-          </button>
         </div>
       `;
             }
@@ -270,17 +313,34 @@
                 .then(data => {
                     console.log('AI Response:', data);
 
-                    if (!data.success) {
-                        addBotMessage('Maaf, layanan AI tidak tersedia. Silakan pilih kategori secara manual.');
+                    const predictionDiv = document.getElementById('chatbotPrediction');
+                    const errorDiv = document.getElementById('chatbotError');
+
+                    if (data.low_confidence) {
+                        addBotMessage(data.message);
+
+                        predictionDiv.style.display = 'none';
+                        errorDiv.style.display = 'block';
+
+                        document.getElementById('errorMessage').textContent = data.message;
+                        document.getElementById('errorConfidenceScore').textContent = data.confidence_score;
+
                         return;
                     }
+
+                    if (!data.success) {
+                        addBotMessage('Maaf, layanan AI tidak tersedia. Silakan pilih kategori secara manual.');
+                        errorDiv.style.display = 'none';
+                        return;
+                    }
+
+                    errorDiv.style.display = 'none';
 
                     addBotMessage(`
     Berdasarkan deskripsi Anda, saya merekomendasikan kategori:
     <strong>${data.category_name}</strong>
   `);
 
-                    const predictionDiv = document.getElementById('chatbotPrediction');
                     predictionDiv.style.display = 'block';
 
                     document.getElementById('predictedCategory').textContent =

@@ -12,7 +12,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
             <h5 class="mb-0 fw-semibold">Daftar Tiket Saya</h5>
-            <p class="text-muted mb-0 small">Kelola dan lacak semua tiket permohonan Anda</p>
+            <p class="text-muted mb-0 small">Kelola semua tiket permohonan Anda</p>
           </div>
           <a href="{{ route('tickets.create') }}" class="btn btn-primary">
             <iconify-icon icon="solar:add-circle-linear" class="me-2"></iconify-icon>Buat Tiket Baru
@@ -120,13 +120,7 @@
                           <iconify-icon icon="solar:eye-linear" class="me-2"></iconify-icon>Lihat Detail
                         </a>
                       </li>
-                      @if(in_array($ticket->status, ['open', 'in_progress']))
-                      <li>
-                        <a class="dropdown-item" href="{{ route('tickets.show', $ticket->id) }}#chat">
-                          <iconify-icon icon="solar:chat-linear" class="me-2"></iconify-icon>Kirim Pesan
-                        </a>
-                      </li>
-                      @endif
+                     
                     </ul>
                   </div>
                 </td>

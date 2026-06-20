@@ -15,10 +15,10 @@ class CategorySeeder extends Seeder
     {
         Category::insert([
             [
-                'name' => 'Infrastuktur IT',
-                'slug' => 'infrastruktur-it',
-                'description' => 'Permasalahan terkait jaringan, server, perangkat keras, dan infrastruktur teknologi informasi lainnya.',
-                'sla_hours' => 8,
+                'name' => 'Software',
+                'slug' => 'software',
+                'description' => 'Permasalahan terkait perangkat lunak seperti instalasi, konfigurasi, dan pemecahan masalah aplikasi.',
+                'sla_hours' => 16,
             ],
             [
                 'name' => 'Hardware',
@@ -27,22 +27,22 @@ class CategorySeeder extends Seeder
                 'sla_hours' => 24,
             ],
             [
-                'name' => 'Software',
-                'slug' => 'software',
-                'description' => 'Permasalahan terkait perangkat lunak seperti instalasi, konfigurasi, dan pemecahan masalah aplikasi.',
-                'sla_hours' => 16,
-            ],
-            [
-                'name' => 'Jaringan',
-                'slug' => 'jaringan',
+                'name' => 'Infrastruktur IT',
+                'slug' => 'infrastruktur-it',
                 'description' => 'Permasalahan terkait jaringan, server, perangkat keras, dan infrastruktur teknologi informasi lainnya.',
-                'sla_hours' => 4,
+                'sla_hours' => 8,
             ],
             [
                 'name' => 'Akses',
                 'slug' => 'akses',
                 'description' => 'Permasalahan terkait akses ke sistem, jaringan, dan sumber daya teknologi informasi.',
                 'sla_hours' => 12,
+            ],
+            [
+                'name' => 'Jaringan',
+                'slug' => 'jaringan',
+                'description' => 'Permasalahan terkait jaringan, server, perangkat keras, dan infrastruktur teknologi informasi lainnya.',
+                'sla_hours' => 4,
             ],
             [
                 'name' => 'Lainnya',

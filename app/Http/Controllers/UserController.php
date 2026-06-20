@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class UserController extends Controller
@@ -16,55 +16,83 @@ class UserController extends Controller
 
         return view('users.index', compact('users'));
     }
-
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users',
-            'nip' => 'required|string|max:255|unique:users',
-            'phone' => 'required|string|max:255',
-            'department' => 'required|string|max:255',
-            'role' => 'required|in:pemohon,teknisi,admin,super-admin',
-            'password' => 'required|string|min:8|confirmed',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'nip' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:255'],
+            'department' => ['required', 'string', 'max:255'],
+            'role' => ['required', Rule::in(['admin', 'kepala-diskominfo', 'pegawai-dinas'])],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
         $validated['password'] = Hash::make($validated['password']);
 
-        User::create($validated);
+        $user = User::create($validated);
+        $user->assignRole($validated['role']);
 
-        return redirect()->route('users.index')->with('success', 'Pengguna berhasil ditambahkan');
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengguna berhasil ditambahkan'
+        ]);
     }
-
-    public function update(Request $request, int $id): RedirectResponse
+    public function update(Request $request, User $user)
     {
-        $user = User::findOrFail($id);
-
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,'.$id,
-            'nip' => 'required|string|max:255|unique:users,nip,'.$id,
-            'phone' => 'required|string|max:255',
-            'department' => 'required|string|max:255',
-            'role' => 'required|in:pemohon,teknisi,admin,super-admin',
-            'password' => 'nullable|string|min:8|confirmed',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'nip' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'max:255'],
+            'department' => ['required', 'string', 'max:255'],
+            'role' => ['required', Rule::in(['admin', 'kepala-diskominfo', 'pegawai-dinas'])],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ]);
 
-        if ($request->filled('password')) {
+        if (! empty($validated['password'])) {
             $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        if ($validated['role'] !== $user->role) {
+            $user->syncRoles($validated['role']);
         }
 
         $user->update($validated);
 
-        return redirect()->route('users.index')->with('success', 'Pengguna berhasil diperbarui');
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengguna berhasil diperbarui'
+        ]);
     }
 
-    public function destroy(int $id): RedirectResponse
+    public function resetPassword(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password pengguna berhasil direset'
+        ]);
+    }
+
+    public function destroy(int $id)
     {
         $user = User::findOrFail($id);
 
         $user->delete();
 
-        return redirect()->route('users.index')->with('success', 'Pengguna berhasil dihapus');
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengguna berhasil dihapus'
+        ]);
     }
 }
