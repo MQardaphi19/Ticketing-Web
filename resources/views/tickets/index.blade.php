@@ -458,7 +458,13 @@
             <tbody>
               @forelse($tickets as $ticket)
               <tr class="ticket-row" data-status="{{ $ticket->status }}" data-priority="{{ $ticket->priority }}" data-category="{{ $ticket->category_id }}" data-assigned="{{ $ticket->assigned_to ?? 'unassigned' }}" data-subject="{{ $ticket->subject }}">
-                <td><input type="checkbox" class="form-check-input ticket-checkbox" value="{{ $ticket->id }}"></td>
+                <td>
+                    @if ($ticket->isOverdue())
+                        <span class="text-muted small">—</span>
+                    @else
+                        <input type="checkbox" class="form-check-input ticket-checkbox" value="{{ $ticket->id }}">
+                    @endif
+                </td>
                 <td>
                   <a href="{{ route('tickets.show', $ticket->id) }}" class="text-primary fw-semibold">{{ $ticket->ticket_number }}</a>
                 </td>
@@ -506,6 +512,9 @@
                   <div class="@if($ticket->sla_due_date && $ticket->sla_due_date < now() && in_array($ticket->status, ['open', 'in_progress'])) text-danger @elseif($ticket->sla_due_date && $ticket->sla_due_date->diffInHours(now()) < 12) text-warning @else text-success @endif small">
                     <iconify-icon icon="solar:clock-circle-linear" class="me-1"></iconify-icon>
                     {{ $ticket->sla_due_date ? $ticket->sla_due_date->format('d M H:i') : '-' }}
+                    @if ($ticket->isOverdue())
+                        <span class="badge bg-danger-subtle text-danger rounded-pill px-2 ms-1">Terlambat</span>
+                    @endif
                   </div>
                 </td>
                 <td>
@@ -519,16 +528,24 @@
                           <iconify-icon icon="solar:eye-linear" class="me-2"></iconify-icon>Lihat Detail
                         </a>
                       </li>
-                      <li>
-                        <a class="dropdown-item" href="#" onclick="quickAssign({{ $ticket->id }})">
-                          <iconify-icon icon="solar:user-plus-linear" class="me-2"></iconify-icon>Tugaskan
-                        </a>
-                      </li>
-                      <li>
-                        <a class="dropdown-item" href="#" onclick="quickChangeStatus({{ $ticket->id }})">
-                          <iconify-icon icon="solar:refresh-linear" class="me-2"></iconify-icon>Ubah Status
-                        </a>
-                      </li>
+                      @if ($ticket->isOverdue())
+                        <li>
+                          <a class="dropdown-item text-muted" href="#" onclick="event.preventDefault()">
+                            <iconify-icon icon="solar:clock-circle-linear" class="me-2"></iconify-icon>Tiket Terlambat
+                          </a>
+                        </li>
+                      @else
+                        <li>
+                          <a class="dropdown-item" href="#" onclick="quickAssign({{ $ticket->id }})">
+                            <iconify-icon icon="solar:user-plus-linear" class="me-2"></iconify-icon>Tugaskan
+                          </a>
+                        </li>
+                        <li>
+                          <a class="dropdown-item" href="#" onclick="quickChangeStatus({{ $ticket->id }})">
+                            <iconify-icon icon="solar:refresh-linear" class="me-2"></iconify-icon>Ubah Status
+                          </a>
+                        </li>
+                      @endif
                     </ul>
                   </div>
                 </td>

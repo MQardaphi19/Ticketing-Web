@@ -7,6 +7,7 @@ use App\Models\Ticket;
 use App\Models\TicketAttachment;
 use App\Models\TicketComment;
 use App\Models\User;
+use App\Notifications\TicketCreatedNotification;
 use App\Notifications\TicketResolvedNotification;
 use App\Notifications\TicketStatusChangedNotification;
 use Illuminate\Http\JsonResponse;
@@ -14,6 +15,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -137,9 +139,10 @@ class TicketController extends Controller
         $validated['sla_due_date'] = now()->addHours($category->sla_hours);
 
         $storedFiles = [];
+        $ticket = null;
 
         try {
-            DB::transaction(function () use ($validated, $files, &$storedFiles): void {
+            DB::transaction(function () use ($validated, $files, &$storedFiles, &$ticket): void {
                 $ticket = Ticket::create($validated);
 
                 foreach ($files as $file) {
@@ -175,6 +178,15 @@ class TicketController extends Controller
                 ->withErrors(['attachments' => 'Lampiran gagal disimpan. Silakan coba lagi.']);
         }
 
+        if ($ticket) {
+            try {
+                $admins = User::whereIn('role', ['admin', 'super-admin'])->get();
+                Notification::send($admins, new TicketCreatedNotification($ticket));
+            } catch (\Throwable $exception) {
+                report($exception);
+            }
+        }
+
         return redirect()->route('tickets.my')->with('success', 'Tiket berhasil dibuat');
     }
 
@@ -197,6 +209,12 @@ class TicketController extends Controller
     public function update(Request $request, int $id): RedirectResponse
     {
         $ticket = Ticket::with('user')->findOrFail($id);
+
+        $user = Auth::user();
+        if ($ticket->isOverdue() && ($user->isAdmin() || $user->isKepalaDiskominfo())) {
+            return back()->with('error', 'Tiket ini sudah melewati batas waktu SLA (' . $ticket->sla_due_date->format('d M Y, H:i') . ') dan tidak dapat diproses lagi.');
+        }
+
         $previousStatus = $ticket->status;
 
         $validated = $request->validate([
@@ -316,6 +334,11 @@ class TicketController extends Controller
             ->whereIn('id', $validated['ticket_ids'])
             ->get();
 
+        $overdueTickets = $tickets->filter(fn ($t) => $t->isOverdue());
+        if ($overdueTickets->isNotEmpty()) {
+            return back()->with('error', 'Beberapa tiket sudah melewati SLA dan tidak dapat ditugaskan: ' . $overdueTickets->pluck('ticket_number')->implode(', '));
+        }
+
         foreach ($tickets as $ticket) {
             $previousStatus = $ticket->status;
 
@@ -346,6 +369,11 @@ class TicketController extends Controller
         $tickets = Ticket::with('user')
             ->whereIn('id', $validated['ticket_ids'])
             ->get();
+
+        $overdueTickets = $tickets->filter(fn ($t) => $t->isOverdue());
+        if ($overdueTickets->isNotEmpty()) {
+            return back()->with('error', 'Beberapa tiket sudah melewati SLA dan tidak dapat diubah statusnya: ' . $overdueTickets->pluck('ticket_number')->implode(', '));
+        }
 
         foreach ($tickets as $ticket) {
             $previousStatus = $ticket->status;

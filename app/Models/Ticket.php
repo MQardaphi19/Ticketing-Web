@@ -67,4 +67,11 @@ class Ticket extends Model
 
         return 'on-track';
     }
+
+    public function isOverdue(): bool
+    {
+        return $this->sla_due_date
+            && now()->gt($this->sla_due_date)
+            && in_array($this->status, ['open', 'in_progress']);
+    }
 }

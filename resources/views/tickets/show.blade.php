@@ -50,9 +50,18 @@
                                     class="fw-semibold @if ($ticket->sla_due_date && $ticket->sla_due_date < now() && in_array($ticket->status, ['open', 'in_progress'])) text-danger @elseif($ticket->sla_due_date && $ticket->sla_due_date->diffInHours(now()) < 12) text-warning @else text-success @endif">
                                     {{ $ticket->sla_due_date ? $ticket->sla_due_date->format('d M Y, H:i') : '-' }}
                                 </span>
+                    </div>
+                    </div>
+                    </div>
+
+                    @if ($ticket->isOverdue())
+                        <div class="alert alert-danger d-flex align-items-start gap-2">
+                            <iconify-icon icon="solar:danger-triangle-linear" class="fs-5 mt-1"></iconify-icon>
+                            <div>
+                                <strong>Tiket Terlambat!</strong> Tiket ini sudah melewati batas waktu SLA ({{ $ticket->sla_due_date->format('d M Y, H:i') }}). Tidak dapat diproses lagi.
                             </div>
                         </div>
-                    </div>
+                    @endif
 
                     @if ($ticket->attachments->count() > 0)
                         <div class="mb-4">
@@ -251,6 +260,27 @@
                     </div>
                 </div>
             </div>
+
+            @can('assign tickets')
+                <div class="card shadow-sm border-0 mt-4">
+                    <div class="card-body p-4">
+                        <h6 class="fw-semibold mb-3">Aksi Tiket</h6>
+                        @if ($ticket->isOverdue())
+                            <button class="btn btn-danger w-100 mb-2" disabled>
+                                <iconify-icon icon="solar:clock-circle-linear" class="me-2"></iconify-icon>Tiket Terlambat
+                            </button>
+                            <p class="text-muted small mb-0 text-center">Tidak dapat diproses karena sudah melewati SLA.</p>
+                        @else
+                            <button class="btn btn-primary w-100 mb-2" onclick="assignTechnician()">
+                                <iconify-icon icon="solar:user-plus-linear" class="me-2"></iconify-icon>Tugaskan Teknisi
+                            </button>
+                            <button class="btn btn-warning w-100" onclick="changeStatus()">
+                                <iconify-icon icon="solar:refresh-linear" class="me-2"></iconify-icon>Ubah Status
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            @endcan
         </div>
     </div>
 

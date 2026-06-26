@@ -88,8 +88,17 @@ class DashboardController extends Controller
 
             $monthlyStatsLate = Ticket::selectRaw('MONTH(created_at) as month, COUNT(*) as late')
                 ->whereYear('created_at', now()->year)
-                ->whereNotNull('resolved_at')
-                ->whereColumn('resolved_at', '>', 'sla_due_date')
+                ->where(function ($q) {
+                    $q->where(function ($q) {
+                        $q->whereNotNull('resolved_at')
+                          ->whereColumn('resolved_at', '>', 'sla_due_date');
+                    })->orWhere(function ($q) {
+                        $q->whereNull('resolved_at')
+                          ->whereNotNull('sla_due_date')
+                          ->where('sla_due_date', '<', now())
+                          ->whereIn('status', ['open', 'in_progress']);
+                    });
+                })
                 ->groupBy('month')
                 ->orderBy('month')
                 ->get();
@@ -134,6 +143,7 @@ class DashboardController extends Controller
                 'months',
                 'monthlyCreated',
                 'monthlyResolved',
+                'monthlyLate'
             ));
         }
 

@@ -64,7 +64,7 @@
                 </div>
                 <div>
                   <h6 class="mb-0 fw-bold">{{ $chatbotAccuracy }}%</h6>
-                  <p class="text-muted mb-0 small">Akurasi</p>
+                  <p class="text-muted mb-0 small">Confidence</p>
                 </div>
               </div>
             </div>
