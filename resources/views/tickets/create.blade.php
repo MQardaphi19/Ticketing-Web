@@ -311,13 +311,23 @@
         }
 
         document.getElementById('ticketForm').addEventListener('submit', function (e) {
-            const now = new Date();
-            const hour = now.getHours();
-            if (hour < 8 || hour >= 16) {
-                e.preventDefault();
-                alert('Tiket hanya dapat dibuat pada jam kerja (08:00 - 16:00). Silakan ulangi pembuatan tiket pada jam kerja.');
-            }
+    const now = new Date();
+    const hour = now.getHours();
+
+    if (hour < 8 || hour >= 16) {
+        e.preventDefault();
+
+        Swal.fire({
+            title: 'Di Luar Jam Kerja',
+            text: 'Tiket hanya dapat dibuat pada jam kerja (08:00 - 16:00). Silakan ulangi pembuatan tiket pada jam kerja.',
+            icon: 'warning',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#2563eb',
+            background: '#f8fbff',
+            color: '#1e3a8a'
         });
+    }
+});
 
         function processChatbotPrediction(message) {
             fetch('/chatbot/predict', {

@@ -902,6 +902,7 @@ function confirmLogout() {
 
     @stack('scripts')
     @vite(['resources/js/app.js'])
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>
