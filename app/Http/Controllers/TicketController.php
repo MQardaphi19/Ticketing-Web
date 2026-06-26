@@ -121,6 +121,12 @@ class TicketController extends Controller
             'attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx',
         ]);
 
+        $hour = (int) now()->format('H');
+        if ($hour < 8 || $hour >= 16) {
+            return redirect()->route('tickets.create')
+                ->with('error', 'Tiket hanya dapat dibuat pada jam kerja (08:00 - 16:00). Silakan ulangi pembuatan tiket pada jam kerja.');
+        }
+
         $category = Category::findOrFail($validated['category_id']);
         $files = $request->file('attachments', []);
         unset($validated['attachments']);

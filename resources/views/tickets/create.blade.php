@@ -11,6 +11,23 @@
                 <div class="card-body p-4">
                     <h5 class="mb-4 fw-semibold">Formulir Permohonan</h5>
 
+                    @if (session('error'))
+                        <div class="alert alert-danger d-flex align-items-start gap-2 alert-dismissible fade show" role="alert">
+                            <iconify-icon icon="solar:danger-triangle-linear" class="fs-5 mt-1"></iconify-icon>
+                            <div class="flex-grow-1">
+                                {{ session('error') }}
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    @endif
+
+                    <div class="alert alert-warning d-flex align-items-start gap-2">
+                        <iconify-icon icon="solar:clock-circle-linear" class="fs-5 mt-1"></iconify-icon>
+                        <div>
+                            <strong>Jam Kerja:</strong> Tiket hanya dapat dibuat pada jam <strong>08:00 - 16:00</strong> WIB.
+                        </div>
+                    </div>
+
                     <form method="POST" action="{{ route('tickets.store') }}" id="ticketForm" enctype="multipart/form-data">
                         @csrf
 
@@ -292,6 +309,15 @@
             chatContainer.insertAdjacentHTML('beforeend', messageHtml);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
+
+        document.getElementById('ticketForm').addEventListener('submit', function (e) {
+            const now = new Date();
+            const hour = now.getHours();
+            if (hour < 8 || hour >= 16) {
+                e.preventDefault();
+                alert('Tiket hanya dapat dibuat pada jam kerja (08:00 - 16:00). Silakan ulangi pembuatan tiket pada jam kerja.');
+            }
+        });
 
         function processChatbotPrediction(message) {
             fetch('/chatbot/predict', {
