@@ -602,7 +602,7 @@
                                 <a class="sidebar-link primary-hover-bg" href="{{ route('chatbot.logs') }}"
                                     aria-expanded="false">
                                     <iconify-icon icon="mdi:chat"></iconify-icon>
-                                    <span class="hide-menu">Log Chatbot</span>
+                                    <span class="hide-menu">Riwayat Chatbot</span>
                                 </a>
                             </li>
                         @endcan
@@ -672,16 +672,7 @@
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <div class="dropdown">
-                                <a href="javascript:void(0)" class="nav-link d-flex align-items-center gap-2"
-                                    id="dropdownUser" data-bs-toggle="dropdown">
-                                    <img src="{{ asset('assets/images/profile/user1.jpg') }}" alt="User"
-                                        class="rounded-circle" width="35" height="35">
-                                    <div class="d-none d-lg-block">
-                                        <h6 class="mb-0 fw-semibold fs-6">
-                                            {{ auth()->check() ? auth()->user()->name : 'Demo User' }}</h6>
-                                        <small class="text-muted">Super Admin</small>
-                                    </div>
-                                </a>
+                                
                                 <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up"
                                     aria-labelledby="dropdownUser">
                                     <li><a class="dropdown-item" href="#"><iconify-icon icon="mdi:account"
@@ -902,7 +893,6 @@ function confirmLogout() {
 
     @stack('scripts')
     @vite(['resources/js/app.js'])
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

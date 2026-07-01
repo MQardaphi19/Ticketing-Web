@@ -2,7 +2,7 @@
 
 @section('title', 'Log Chatbot - Sistem Tiket Layanan Kominfo')
 
-@section('page-title', 'Log Chatbot AI')
+@section('page-title', 'Riwayat Chatbot AI')
 
 @section('content')
 <div class="row">
@@ -11,13 +11,13 @@
       <div class="card-body p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <div>
-            <h5 class="mb-0 fw-semibold">Log Prediksi Chatbot</h5>
-            <p class="text-muted mb-0 small">Riwayat prediksi dan akurasi model Naive Bayes</p>
+            <h5 class="mb-0 fw-semibold">Riwayat Chatbot</h5>
+            <p class="text-muted mb-0 small">Riwayat dan statistik chatbot</p>
           </div>
         </div>
 
         <div class="row mb-4">
-          <div class="col-md-3">
+          <div class="col-md-4">
             <div class="border rounded-3 p-3 bg-primary-subtle">
               <div class="d-flex align-items-center gap-3">
                 <div class="bg-white rounded-circle p-2">
@@ -30,7 +30,7 @@
               </div>
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-4">
             <div class="border rounded-3 p-3 bg-success-subtle">
               <div class="d-flex align-items-center gap-3">
                 <div class="bg-white rounded-circle p-2">
@@ -38,12 +38,12 @@
                 </div>
                 <div>
                   <h6 class="mb-0 fw-bold">{{ $correctPredictions }}</h6>
-                  <p class="text-muted mb-0 small">Prediksi Benar</p>
+                  <p class="text-muted mb-0 small">Jumlah Status Benar</p>
                 </div>
               </div>
             </div>
           </div>
-          <div class="col-md-3">
+          <div class="col-md-4">
             <div class="border rounded-3 p-3 bg-danger-subtle">
               <div class="d-flex align-items-center gap-3">
                 <div class="bg-white rounded-circle p-2">
@@ -51,32 +51,20 @@
                 </div>
                 <div>
                   <h6 class="mb-0 fw-bold">{{ $wrongPredictions }}</h6>
-                  <p class="text-muted mb-0 small">Prediksi Salah</p>
+                  <p class="text-muted mb-0 small">Jumlah Status Salah</p>
                 </div>
               </div>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="border rounded-3 p-3 bg-warning-subtle">
-              <div class="d-flex align-items-center gap-3">
-                <div class="bg-white rounded-circle p-2">
-                  <iconify-icon icon="solar:chart-linear" class="text-warning fs-4"></iconify-icon>
-                </div>
-                <div>
-                  <h6 class="mb-0 fw-bold">{{ $chatbotAccuracy }}%</h6>
-                  <p class="text-muted mb-0 small">Confidence</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        
         </div>
 
         <div class="alert alert-info d-flex align-items-start gap-2">
           <iconify-icon icon="solar:info-circle-linear" class="fs-5"></iconify-icon>
           <div>
-            <strong>Validasi Akurasi:</strong>
+            <strong>Validasi Chatbot</strong>
             <ul class="mb-0 small">
-              <li>Validasi prediksi chatbot untuk memperbaiki akurasi model</li>
+              <li>Validasi chatbot untuk melihat statistik chatbot</li>
               <li>Data yang divalidasi akan digunakan untuk pelatihan ulang model</li>
               <li>Klik tombol validasi pada setiap prediksi untuk menandai sebagai benar atau salah</li>
             </ul>
